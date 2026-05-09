@@ -1,9 +1,11 @@
 import DispatchContext from "../contexts/DispatchContext";
+import ConfigContext from "../contexts/ConfigContext";
+import DataContext from "../contexts/DataContext";
+import ReactiveContext from "../contexts/ReactiveContext";
 import { type StoreStateType, type StoreAction } from "../types";
-import { useReducer, type ReactNode } from "react";
+import { useMemo, useReducer, type ReactNode } from "react";
 import initialState from "../store/initialState";
 import storeReducer from "../store/storeReducer";
-import StateContext from "../contexts/StateContext";
 
 type StoreProviderProps = {
   id: string;
@@ -18,7 +20,6 @@ type StoreProviderProps = {
 
 function initState(props: StoreProviderProps): StoreStateType {
   const initialZoom = props.initialZoom ?? initialState.initialZoom;
-  console.log("StoreProvider initState ", props.initialZoom);
 
   const state = {
     ...initialState,
@@ -35,16 +36,6 @@ function initState(props: StoreProviderProps): StoreStateType {
   return state;
 }
 
-// TODO 四层 Context 架构
-// // 1. Dispatch Layer - 永远不变
-// const DispatchContext = createContext<React.Dispatch<Action> | null>(null);
-// // 2. Static Config Layer - 来自 props，初始化后不变
-// const ConfigContext = createContext<AppConfig | null>(null);
-// // 3. Dynamic Data Layer - 业务状态，中低频变化
-// const DataContext = createContext<AppData | null>(null);
-// // 4. High-Frequency Layer - 实时状态，高频变化
-// const ReactiveContext = createContext<ReactiveState | null>(null);
-
 export default function StoreProvider(props: StoreProviderProps) {
   const { children } = props;
   const [state, dispatch] = useReducer<StoreStateType, StoreProviderProps, [StoreAction]>(
@@ -54,10 +45,48 @@ export default function StoreProvider(props: StoreProviderProps) {
   );
 
   // useMemo 稳定各层的引用
+  const configValue = useMemo(() => ({ id: state.id }), [state.id]);
+  const dataValue = useMemo(
+    () => ({
+      minZoom: state.minZoom,
+      maxZoom: state.maxZoom,
+      zoomStep: state.zoomStep,
+      initialZoom: state.initialZoom,
+    }),
+    [state.minZoom, state.maxZoom, state.zoomStep, state.initialZoom],
+  );
+  const reactiveValue = useMemo(
+    () => ({
+      canvasTransform: {
+        x: state.canvasTransform.x,
+        y: state.canvasTransform.y,
+        zoom: state.canvasTransform.zoom,
+      },
+      mousePosition: { x: state.mousePosition.x, y: state.mousePosition.y },
+      selectedPoint: state.selectedPoint
+        ? { x: state.selectedPoint.x, y: state.selectedPoint.y }
+        : null,
+      isPanning: state.isPanning,
+    }),
+    [
+      state.canvasTransform.x,
+      state.canvasTransform.y,
+      state.canvasTransform.zoom,
+      state.mousePosition.x,
+      state.mousePosition.y,
+      state.selectedPoint?.x,
+      state.selectedPoint?.y,
+      state.isPanning,
+    ],
+  );
 
   return (
     <DispatchContext.Provider value={dispatch}>
-      <StateContext.Provider value={state}>{children}</StateContext.Provider>
+      <ConfigContext.Provider value={configValue}>
+        <DataContext.Provider value={dataValue}>
+          <ReactiveContext.Provider value={reactiveValue}>{children}</ReactiveContext.Provider>
+        </DataContext.Provider>
+      </ConfigContext.Provider>
     </DispatchContext.Provider>
   );
 }

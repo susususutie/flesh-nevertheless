@@ -1,6 +1,6 @@
-import useStore from "../hooks/useState";
+import useReactive from "../hooks/useReactive";
 
 export default function DisplayZoom() {
-  const store = useStore();
-  return <div>Zoom: {store?.canvasTransform?.zoom ?? "none"}</div>;
+  const reactive = useReactive();
+  return <div>Zoom: {reactive.canvasTransform.zoom ?? "none"}</div>;
 }
