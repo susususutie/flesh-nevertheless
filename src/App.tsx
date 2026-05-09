@@ -2,6 +2,7 @@ import { useState } from "react";
 import Root from "./Root";
 import DisplayZoom from "./additional-components/DisplayZoom";
 import ZoomController from "./additional-components/ZoomController";
+import Toolbar from "./additional-components/Toolbar";
 
 export default function App() {
   const [zoom, setZoom] = useState(80);
@@ -13,25 +14,32 @@ export default function App() {
       </div>
 
       <Root
+        id="root-1"
         initialZoom={zoom}
         style={{ padding: 16, width: 300, height: 200, border: "1px solid" }}
       >
         1. Hello React + TypeScript!
-        <DisplayZoom />
-        <ZoomController />
+        <Toolbar>
+          <DisplayZoom />
+          <ZoomController />
+        </Toolbar>
       </Root>
 
-      {/* <Root style={{ padding: 16, width: 300, height: 200, border: "1px solid" }}>
+      <Root style={{ padding: 16, width: 300, height: 200, border: "1px solid" }}>
         2. Hello React + TypeScript!
-        <DisplayZoom />
-        <ZoomController />
+        <Toolbar>
+          <DisplayZoom />
+          <ZoomController />
+        </Toolbar>
       </Root>
 
       <Root style={{ padding: 16, width: 300, height: 200, border: "1px solid" }}>
         3. Hello React + TypeScript!
-        <DisplayZoom />
-        <ZoomController />
-      </Root> */}
+        <Toolbar>
+          <DisplayZoom />
+          <ZoomController />
+        </Toolbar>
+      </Root>
     </div>
   );
 }
