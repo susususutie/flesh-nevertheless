@@ -2,6 +2,7 @@ import { useState } from "react";
 import Root from "./Root";
 import Background from "./additional-components/Background";
 import DisplayZoom from "./additional-components/DisplayZoom";
+import Controls from "./additional-components/Controls";
 import ZoomController from "./additional-components/ZoomController";
 import Toolbar from "./additional-components/Toolbar";
 
@@ -23,6 +24,7 @@ export default function App() {
         </Toolbar>
         <Background id="1" />
         {/* <Background id="2" gap={[35, 35]} color="red" /> */}
+        <Controls />
       </Root>
 
       <Root style={{ width: 300, height: 200, border: "1px solid" }}>

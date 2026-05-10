@@ -1,28 +1,27 @@
 import { useMemo, type ReactNode } from "react";
+import Panel, { type PanelProps } from "../components/Panel";
 
-export default function Toolbar({
-  position = "bottom-right",
-  children,
-}: {
-  position?: "top-left" | "top-right" | "bottom-left" | "bottom-right";
+type ToolbarProps = Pick<PanelProps, "position"> & {
   children: ReactNode;
-}) {
+};
+
+export default function Toolbar(props: ToolbarProps) {
+  const { position = "bottom-right", children } = props;
+
   const style: React.CSSProperties = useMemo(
     () => ({
-      position: "absolute",
-      top: position === "top-left" || position === "top-right" ? 0 : undefined,
-      left: position === "top-left" || position === "bottom-left" ? 0 : undefined,
-      right: position === "top-right" || position === "bottom-right" ? 0 : undefined,
-      bottom: position === "bottom-left" || position === "bottom-right" ? 0 : undefined,
+      padding: 8,
       display: "flex",
+      flexDirection: "column",
       justifyContent:
         position === "top-left" || position === "bottom-left" ? "flex-start" : "flex-end",
       alignItems:
         position === "top-left" || position === "bottom-right" ? "flex-start" : "flex-end",
       gap: 16,
+      boxShadow: "0 0 2px 1px rgba(0, 0, 0, .08)",
     }),
     [position],
   );
 
-  return <div style={style}>{children}</div>;
+  return <Panel style={style}>{children}</Panel>;
 }
