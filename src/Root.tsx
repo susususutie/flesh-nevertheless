@@ -1,5 +1,10 @@
 import StoreProvider from "./components/StoreProvider";
 import StoreUpdater from "./components/StoreUpdater";
+import NodeRenderer from "./container/NodeRenderer";
+import Pane from "./container/Pane";
+import Viewport from "./container/Viewport";
+import ZoomPane from "./container/ZoomPane";
+
 import { memo, useId, type CSSProperties, type HTMLAttributes } from "react";
 
 type RootPropsType = HTMLAttributes<HTMLDivElement> & {
@@ -20,7 +25,10 @@ function Root(props: RootPropsType) {
   // console.log("Root render", id);
 
   return (
-    <div id={id} style={{ ...style, position: "relative" }}>
+    <div
+      id={id}
+      style={{ position: "relative", width: "100%", height: "100%", overflow: "hidden", ...style }}
+    >
       {/* 根据 props 初始化全局状态  */}
       <StoreProvider
         id={id}
@@ -36,6 +44,13 @@ function Root(props: RootPropsType) {
           minZoom={minZoom}
           maxZoom={maxZoom}
         />
+        <ZoomPane>
+          <Pane>
+            <Viewport>
+              <NodeRenderer />
+            </Viewport>
+          </Pane>
+        </ZoomPane>
         {children}
       </StoreProvider>
     </div>
