@@ -3,10 +3,11 @@ import { type StoreStateType } from "../types";
 const initialState: StoreStateType = {
   id: "",
   initialZoom: 100,
-  minZoom: 10,
-  maxZoom: 500,
+  minZoom: 50,
+  maxZoom: 200,
   zoomStep: 10,
-  canvasTransform: {
+  panZoom: null,
+  transform: {
     x: 0,
     y: 0,
     zoom: 100,

@@ -5,6 +5,9 @@ import FitViewIcon from "./FitViewIcon";
 import LockIcon from "./LockIcon";
 import UnlockIcon from "./UnlockIcon";
 import "./index.css";
+import useData from "../../hooks/useData";
+import useReactive from "../../hooks/useReactive";
+import useDispatch from "../../hooks/useDispatch";
 
 type ControlsProps = {
   showZoom?: boolean;
@@ -14,6 +17,35 @@ type ControlsProps = {
 
 export default function Controls(props: ControlsProps) {
   const { showZoom = true, showFitView = true, showInteractive = true } = props;
+  const data = useData();
+  const panZoom = data.panZoom;
+  const reactive = useReactive();
+  const dispatch = useDispatch();
+
+  const minZoomReached = reactive.transform.zoom <= data.minZoom;
+  const maxZoomReached = reactive.transform.zoom >= data.maxZoom;
+
+  // 基于画框中心点缩放
+  const handleZoomIn = () => {
+    //
+    console.log(reactive.transform);
+    if (maxZoomReached) return;
+    if (panZoom) {
+      const transform = panZoom.zoomIn();
+      if (transform) {
+        dispatch({ type: "transform", payload: transform });
+      }
+    }
+  };
+  const handleZoomOut = () => {
+    if (minZoomReached) return;
+    if (panZoom) {
+      const transform = panZoom.zoomOut();
+      if (transform) {
+        dispatch({ type: "transform", payload: transform });
+      }
+    }
+  };
 
   // const
   const isInteractive = false;
@@ -28,10 +60,10 @@ export default function Controls(props: ControlsProps) {
     >
       {showZoom ? (
         <>
-          <button className="control-button">
+          <button className="control-button" disabled={maxZoomReached} onClick={handleZoomIn}>
             <PlusIcon />
           </button>
-          <button className="control-button">
+          <button className="control-button" disabled={minZoomReached} onClick={handleZoomOut}>
             <MinusIcon />
           </button>
         </>

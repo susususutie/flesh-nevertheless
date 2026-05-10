@@ -1,3 +1,5 @@
+import PanZoom from "../helper/PanZoom";
+
 // 静态配置, 来自 props，初始化后不变（从 props 中获取初始化后恒定不变 ）
 export type StoreConfig = {
   id: string;
@@ -9,11 +11,12 @@ export type StoreData = {
   maxZoom: number;
   zoomStep: number;
   initialZoom: number;
+  panZoom: PanZoom | null;
 };
 
 // reactive 实时状态，高频变化（帧级）
 export type StoreReactive = {
-  canvasTransform: {
+  transform: {
     x: number; // 位移 X
     y: number; // 位移 Y
     zoom: number; // 缩放百分比例，整数方便计算
@@ -28,7 +31,9 @@ export type StoreStateType = StoreConfig & StoreData & StoreReactive;
 
 export type StoreAction =
   | { type: "setZoom"; payload: number }
+  | { type: "transform"; payload: StoreReactive["transform"] }
   | { type: "setInitialZoom"; payload: number }
   | { type: "incrementZoom" }
   | { type: "decrementZoom" }
-  | { type: "reset" };
+  | { type: "reset" }
+  | { type: "setPanZoom"; payload: PanZoom | null };

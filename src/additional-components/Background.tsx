@@ -14,7 +14,7 @@ export default function Background(props: BackgroundProps) {
   const { id: _backgroundId, gap = 20, size = 2, color = "#cdcdcd", bgColor } = props;
   const { id } = useConfig();
   const reactive = useReactive();
-  const { x, y, zoom } = reactive.canvasTransform;
+  const { x, y, zoom } = reactive.transform;
 
   const scale = zoom / 100;
   const gapXY: [number, number] = Array.isArray(gap) ? gap : [gap, gap];
@@ -43,7 +43,7 @@ export default function Background(props: BackgroundProps) {
         width={scaledGap[0]}
         height={scaledGap[1]}
         patternUnits="userSpaceOnUse"
-        patternTransform={`transform: translate(-20.752, -20.752);`}
+        // patternTransform={`transform: translate(-20.752, -20.752);`}
       >
         <circle cx={scaledSize / 2} cy={scaledSize / 2} r={scaledSize} fill={color} />
       </pattern>

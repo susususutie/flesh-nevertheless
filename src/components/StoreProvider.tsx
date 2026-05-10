@@ -28,8 +28,8 @@ function initState(props: StoreProviderProps): StoreStateType {
     minZoom: props.minZoom ?? initialState.minZoom,
     maxZoom: props.maxZoom ?? initialState.maxZoom,
     zoomStep: props.zoomStep ?? initialState.zoomStep,
-    canvasTransform: {
-      ...initialState.canvasTransform,
+    transform: {
+      ...initialState.transform,
       zoom: initialZoom,
     },
   };
@@ -52,15 +52,16 @@ export default function StoreProvider(props: StoreProviderProps) {
       maxZoom: state.maxZoom,
       zoomStep: state.zoomStep,
       initialZoom: state.initialZoom,
+      panZoom: state.panZoom,
     }),
-    [state.minZoom, state.maxZoom, state.zoomStep, state.initialZoom],
+    [state.minZoom, state.maxZoom, state.zoomStep, state.initialZoom, state.panZoom],
   );
   const reactiveValue = useMemo(
     () => ({
-      canvasTransform: {
-        x: state.canvasTransform.x,
-        y: state.canvasTransform.y,
-        zoom: state.canvasTransform.zoom,
+      transform: {
+        x: state.transform.x,
+        y: state.transform.y,
+        zoom: state.transform.zoom,
       },
       mousePosition: { x: state.mousePosition.x, y: state.mousePosition.y },
       selectedPoint: state.selectedPoint
@@ -69,9 +70,9 @@ export default function StoreProvider(props: StoreProviderProps) {
       isPanning: state.isPanning,
     }),
     [
-      state.canvasTransform.x,
-      state.canvasTransform.y,
-      state.canvasTransform.zoom,
+      state.transform.x,
+      state.transform.y,
+      state.transform.zoom,
       state.mousePosition.x,
       state.mousePosition.y,
       state.selectedPoint?.x,
