@@ -1,13 +1,12 @@
 import Panel from "../../components/Panel";
-import PlusIcon from "./PlusIcon";
-import MinusIcon from "./MinusIcon";
-import FitViewIcon from "./FitViewIcon";
-import LockIcon from "./LockIcon";
-import UnlockIcon from "./UnlockIcon";
-import "./index.css";
 import useData from "../../hooks/useData";
 import useReactive from "../../hooks/useReactive";
-import useDispatch from "../../hooks/useDispatch";
+import FitViewIcon from "./FitViewIcon";
+import LockIcon from "./LockIcon";
+import MinusIcon from "./MinusIcon";
+import PlusIcon from "./PlusIcon";
+import UnlockIcon from "./UnlockIcon";
+import "./index.css";
 
 type ControlsProps = {
   showZoom?: boolean;
@@ -20,7 +19,6 @@ export default function Controls(props: ControlsProps) {
   const data = useData();
   const panZoom = data.panZoom;
   const reactive = useReactive();
-  const dispatch = useDispatch();
 
   const minZoomReached = reactive.transform[2] <= data.minZoom;
   const maxZoomReached = reactive.transform[2] >= data.maxZoom;
@@ -31,19 +29,13 @@ export default function Controls(props: ControlsProps) {
     console.log(reactive.transform);
     if (maxZoomReached) return;
     if (panZoom) {
-      const transform = panZoom.zoomIn();
-      if (transform) {
-        dispatch({ type: "transform", payload: transform });
-      }
+      panZoom.zoomIn();
     }
   };
   const handleZoomOut = () => {
     if (minZoomReached) return;
     if (panZoom) {
-      const transform = panZoom.zoomOut();
-      if (transform) {
-        dispatch({ type: "transform", payload: transform });
-      }
+      panZoom.zoomOut();
     }
   };
 

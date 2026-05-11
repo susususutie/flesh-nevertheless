@@ -1,5 +1,5 @@
 import PanZoom from "../helper/PanZoom";
-import { type Transform } from ".";
+import { type Transform, type Viewport } from ".";
 
 // 静态配置, 来自 props，初始化后不变（从 props 中获取初始化后恒定不变 ）
 export type StoreConfig = {
@@ -10,7 +10,7 @@ export type StoreConfig = {
 export type StoreData = {
   minZoom: number; // 缩放比例（scale）
   maxZoom: number;
-  initialZoom: number;
+  defaultViewport: Viewport;
   panZoom: PanZoom | null;
 };
 
@@ -28,7 +28,10 @@ export type StoreStateType = StoreConfig & StoreData & StoreReactive;
 export type StoreAction =
   | { type: "setZoom"; payload: number }
   | { type: "transform"; payload: StoreReactive["transform"] }
-  | { type: "setInitialZoom"; payload: number }
+  | { type: "syncViewport"; payload: Viewport }
+  | { type: "setDefaultViewport"; payload: Viewport }
+  | { type: "setMinZoom"; payload: number }
+  | { type: "setMaxZoom"; payload: number }
   | { type: "incrementZoom" }
   | { type: "decrementZoom" }
   | { type: "reset" }

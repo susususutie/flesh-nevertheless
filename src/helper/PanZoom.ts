@@ -1,10 +1,11 @@
-import { type Transform } from "../types";
+import { type Transform, type Viewport } from "../types";
 
 type Options = {
   el: HTMLElement;
   minZoom: number;
   maxZoom: number;
-  transform: Transform;
+  viewport: Viewport;
+  onTransformChange: (transform: Transform) => void;
 };
 
 /** 参考 d3-zoom 实现一个 PanZoom 类 */
@@ -12,7 +13,8 @@ class PanZoom {
   private el: HTMLElement | null;
   private minZoom: number;
   private maxZoom: number;
-  private transform: Transform;
+  private viewport: Viewport;
+  private onTransformChange: (transform: Transform) => void;
   private destroyed: boolean;
 
   constructor(options: Options) {
@@ -21,7 +23,8 @@ class PanZoom {
     this.el = options.el;
     this.minZoom = options.minZoom;
     this.maxZoom = options.maxZoom;
-    this.transform = options.transform;
+    this.viewport = options.viewport;
+    this.onTransformChange = options.onTransformChange;
     this.destroyed = false;
   }
 
@@ -34,12 +37,12 @@ class PanZoom {
     };
   }
 
-  #zoomAtClient(clientX: number, clientY: number, nextZoomRaw: number) {
+  #zoomAtClient(clientX: number, clientY: number, nextZoomRaw: number): Viewport | undefined {
     // 限制缩放范围
     const clampedZoom = Math.max(this.minZoom, Math.min(this.maxZoom, nextZoomRaw));
-    const currentZoom = this.transform[2];
-    const currentX = this.transform[0];
-    const currentY = this.transform[1];
+    const currentZoom = this.viewport.zoom;
+    const currentX = this.viewport.x;
+    const currentY = this.viewport.y;
 
     if (currentZoom === 0) return;
     if (clampedZoom === currentZoom) return;
@@ -51,10 +54,14 @@ class PanZoom {
     const nextX = originX - (originX - currentX) * ratio;
     const nextY = originY - (originY - currentY) * ratio;
 
-    return [nextX, nextY, clampedZoom] as Transform;
+    return {
+      x: nextX,
+      y: nextY,
+      zoom: clampedZoom,
+    };
   }
 
-  zoomIn(config?: { x: number; y: number }): Transform | null {
+  zoomIn(config?: { x: number; y: number }): Viewport | null {
     if (this.destroyed) return null;
 
     let clientX = 0;
@@ -70,15 +77,16 @@ class PanZoom {
       clientY = config.y;
     }
 
-    const transform = this.#zoomAtClient(clientX, clientY, this.transform[2] * 1.2);
+    const viewport = this.#zoomAtClient(clientX, clientY, this.viewport.zoom * 1.2);
 
-    if (!transform) return null;
+    if (!viewport) return null;
 
-    this.transform = transform;
-    return transform;
+    this.viewport = viewport;
+    this.onTransformChange?.([viewport.x, viewport.y, viewport.zoom]);
+    return viewport;
   }
 
-  zoomOut(): Transform | null {
+  zoomOut(): Viewport | null {
     if (this.destroyed) return null;
     const rect = this.el?.getBoundingClientRect();
     if (!rect) return null;
@@ -88,12 +96,13 @@ class PanZoom {
       y: rect.height / 2 + rect.top,
     };
 
-    const transform = this.#zoomAtClient(centerClient.x, centerClient.y, this.transform[2] * 0.8);
+    const viewport = this.#zoomAtClient(centerClient.x, centerClient.y, this.viewport.zoom * 0.8);
 
-    if (!transform) return null;
+    if (!viewport) return null;
 
-    this.transform = transform;
-    return transform;
+    this.viewport = viewport;
+    this.onTransformChange?.([viewport.x, viewport.y, viewport.zoom]);
+    return viewport;
   }
 
   destroy() {

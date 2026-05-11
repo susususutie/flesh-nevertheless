@@ -1,14 +1,22 @@
 import { type StoreStateType, type StoreAction } from "../types";
 import PanZoom from "../helper/PanZoom";
 
+function isFiniteNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value);
+}
+
+function clampZoom(zoom: number, minZoom: number, maxZoom: number) {
+  return Math.max(Math.min(zoom, maxZoom), minZoom);
+}
+
 export default function storeReducer(state: StoreStateType, action: StoreAction): StoreStateType {
   switch (action.type) {
     case "setZoom": {
       let nextZoom = action.payload;
-      if (typeof nextZoom !== "number" || !Number.isFinite(nextZoom)) {
+      if (!isFiniteNumber(nextZoom)) {
         return state;
       }
-      nextZoom = Math.max(Math.min(nextZoom, state.maxZoom), state.minZoom);
+      nextZoom = clampZoom(nextZoom, state.minZoom, state.maxZoom);
       if (nextZoom === state.transform[2]) {
         return state;
       }
@@ -17,19 +25,12 @@ export default function storeReducer(state: StoreStateType, action: StoreAction)
     case "transform": {
       const [x, y, zoom] = action.payload;
 
-      if (
-        typeof x !== "number" ||
-        !Number.isFinite(x) ||
-        typeof y !== "number" ||
-        !Number.isFinite(y) ||
-        typeof zoom !== "number" ||
-        !Number.isFinite(zoom)
-      ) {
+      if (!isFiniteNumber(x) || !isFiniteNumber(y) || !isFiniteNumber(zoom)) {
         return state;
       }
 
       let nextZoom = zoom;
-      nextZoom = Math.max(Math.min(nextZoom, state.maxZoom), state.minZoom);
+      nextZoom = clampZoom(nextZoom, state.minZoom, state.maxZoom);
 
       if (x === state.transform[0] && y === state.transform[1] && nextZoom === state.transform[2]) {
         return state;
@@ -37,24 +38,75 @@ export default function storeReducer(state: StoreStateType, action: StoreAction)
 
       return { ...state, transform: [x, y, nextZoom] };
     }
-    case "setInitialZoom": {
-      let initialZoom = action.payload;
-      if (initialZoom === state.initialZoom) {
+    case "syncViewport": {
+      const { x, y, zoom } = action.payload;
+      if (!isFiniteNumber(x) || !isFiniteNumber(y) || !isFiniteNumber(zoom)) {
         return state;
       }
-      if (typeof initialZoom !== "number" || !Number.isFinite(initialZoom)) {
+      if (x === state.transform[0] && y === state.transform[1] && zoom === state.transform[2]) {
         return state;
       }
-      if (initialZoom < state.minZoom || initialZoom > state.maxZoom) {
+      return { ...state, transform: [x, y, zoom] };
+    }
+    case "setDefaultViewport": {
+      const { x, y, zoom } = action.payload;
+      if (!isFiniteNumber(x) || !isFiniteNumber(y) || !isFiniteNumber(zoom)) {
         return state;
       }
-      return { ...state, initialZoom };
+      const nextZoom = clampZoom(zoom, state.minZoom, state.maxZoom);
+      if (
+        x === state.defaultViewport.x &&
+        y === state.defaultViewport.y &&
+        nextZoom === state.defaultViewport.zoom
+      ) {
+        return state;
+      }
+      return { ...state, defaultViewport: { x, y, zoom: nextZoom } };
+    }
+    case "setMinZoom": {
+      const nextMinZoom = action.payload;
+      if (!isFiniteNumber(nextMinZoom)) {
+        return state;
+      }
+      if (nextMinZoom === state.minZoom) {
+        return state;
+      }
+      const nextDefaultZoom = clampZoom(state.defaultViewport.zoom, nextMinZoom, state.maxZoom);
+      if (nextDefaultZoom === state.defaultViewport.zoom) {
+        return { ...state, minZoom: nextMinZoom };
+      }
+      return {
+        ...state,
+        minZoom: nextMinZoom,
+        defaultViewport: { ...state.defaultViewport, zoom: nextDefaultZoom },
+      };
+    }
+    case "setMaxZoom": {
+      const nextMaxZoom = action.payload;
+      if (!isFiniteNumber(nextMaxZoom)) {
+        return state;
+      }
+      if (nextMaxZoom === state.maxZoom) {
+        return state;
+      }
+      const nextDefaultZoom = clampZoom(state.defaultViewport.zoom, state.minZoom, nextMaxZoom);
+      if (nextDefaultZoom === state.defaultViewport.zoom) {
+        return { ...state, maxZoom: nextMaxZoom };
+      }
+      return {
+        ...state,
+        maxZoom: nextMaxZoom,
+        defaultViewport: { ...state.defaultViewport, zoom: nextDefaultZoom },
+      };
     }
     case "reset":
-      return { ...state, transform: [state.transform[0], state.transform[1], state.initialZoom] };
+      return {
+        ...state,
+        transform: [state.defaultViewport.x, state.defaultViewport.y, state.defaultViewport.zoom],
+      };
     case "incrementZoom": {
       let newZoom = state.transform[2] * 1.2;
-      newZoom = Math.max(Math.min(newZoom, state.maxZoom), state.minZoom);
+      newZoom = clampZoom(newZoom, state.minZoom, state.maxZoom);
       if (newZoom === state.transform[2]) {
         return state;
       }
@@ -62,7 +114,7 @@ export default function storeReducer(state: StoreStateType, action: StoreAction)
     }
     case "decrementZoom": {
       let newZoom = state.transform[2] * 0.8;
-      newZoom = Math.max(Math.min(newZoom, state.maxZoom), state.minZoom);
+      newZoom = clampZoom(newZoom, state.minZoom, state.maxZoom);
       if (newZoom === state.transform[2]) {
         return state;
       }

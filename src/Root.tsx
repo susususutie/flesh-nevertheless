@@ -4,29 +4,22 @@ import NodeRenderer from "./container/NodeRenderer";
 import Pane from "./container/Pane";
 import FlowViewport from "./container/Viewport";
 import ZoomPane from "./container/ZoomPane";
-import { type Viewport } from "./types/general";
+import { type RootPropsType, type Viewport } from "./types";
+import { memo, useId, type CSSProperties } from "react";
 
-import { memo, useId, type CSSProperties, type HTMLAttributes } from "react";
-
-type RootPropsType = HTMLAttributes<HTMLDivElement> & {
-  // id?: string;
-  // style?: CSSProperties;
-  // children: ReactNode;
-
-  initialZoom?: number;
-  minZoom?: number;
-  maxZoom?: number;
-
-  defaultViewport?: Viewport;
-  /**
-   * 手动传入 viewport 时，受控模式，viewport 变更时触发 onViewportChange
-   */
-  viewport?: Viewport;
-  onViewportChange?: (viewport: Viewport) => void;
-};
+const initViewport: Viewport = { x: 0, y: 0, zoom: 1 };
 
 function Root(props: RootPropsType) {
-  const { id: _id, style, children, initialZoom, minZoom, maxZoom } = props;
+  const {
+    id: _id,
+    style,
+    children,
+    minZoom,
+    maxZoom,
+    defaultViewport = initViewport,
+    viewport,
+    onViewportChange,
+  } = props;
 
   const id = _id ?? `Root-${useId()}`;
   // console.log("Root render", id);
@@ -37,10 +30,22 @@ function Root(props: RootPropsType) {
       style={{ position: "relative", width: "100%", height: "100%", overflow: "hidden", ...style }}
     >
       {/* 根据 props 初始化全局状态  */}
-      <StoreProvider id={id} initialZoom={initialZoom} minZoom={minZoom} maxZoom={maxZoom}>
+      <StoreProvider
+        id={id}
+        minZoom={minZoom}
+        maxZoom={maxZoom}
+        defaultViewport={defaultViewport}
+        viewport={viewport}
+        onViewportChange={onViewportChange}
+      >
         {/* 后续 props 变更，同步到全局状态 */}
-        <StoreUpdater initialZoom={initialZoom} minZoom={minZoom} maxZoom={maxZoom} />
-        <ZoomPane>
+        <StoreUpdater
+          minZoom={minZoom}
+          maxZoom={maxZoom}
+          defaultViewport={defaultViewport}
+          viewport={viewport}
+        />
+        <ZoomPane isControlledViewport={!!viewport} onViewportChange={onViewportChange}>
           <Pane>
             <FlowViewport>
               <NodeRenderer />

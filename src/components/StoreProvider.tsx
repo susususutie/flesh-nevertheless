@@ -1,32 +1,42 @@
-import DispatchContext from "../contexts/DispatchContext";
+import { useMemo, useReducer, type ReactNode } from "react";
 import ConfigContext from "../contexts/ConfigContext";
 import DataContext from "../contexts/DataContext";
+import DispatchContext from "../contexts/DispatchContext";
 import ReactiveContext from "../contexts/ReactiveContext";
-import { type StoreStateType, type StoreAction } from "../types";
-import { useMemo, useReducer, type ReactNode } from "react";
 import initialState from "../store/initialState";
 import storeReducer from "../store/storeReducer";
+import { type RootPropsType, type StoreAction, type StoreStateType } from "../types";
 
 type StoreProviderProps = {
   id: string;
-
-  minZoom?: number;
-  maxZoom?: number;
-  initialZoom?: number;
-
   children: ReactNode;
-};
+} & Pick<
+  RootPropsType,
+  "minZoom" | "maxZoom" | "defaultViewport" | "viewport" | "onViewportChange"
+>;
 
 function initState(props: StoreProviderProps): StoreStateType {
-  const initialZoom = props.initialZoom ?? initialState.initialZoom;
+  const minZoom = props.minZoom ?? initialState.minZoom;
+  const maxZoom = props.maxZoom ?? initialState.maxZoom;
+  const resolvedDefaultViewport = props.defaultViewport ?? initialState.defaultViewport;
+  const isControlled = props.viewport !== undefined;
+  const resolvedInitialViewport = props.viewport ?? resolvedDefaultViewport;
+  const initialZoom = isControlled
+    ? resolvedInitialViewport.zoom
+    : Math.max(Math.min(resolvedInitialViewport.zoom, maxZoom), minZoom);
+  const clampedDefaultZoom = Math.max(Math.min(resolvedDefaultViewport.zoom, maxZoom), minZoom);
 
   const state = {
     ...initialState,
     id: props.id,
-    initialZoom,
-    minZoom: props.minZoom ?? initialState.minZoom,
-    maxZoom: props.maxZoom ?? initialState.maxZoom,
-    transform: [initialState.transform[0], initialState.transform[1], initialZoom] as [
+    minZoom,
+    maxZoom,
+    defaultViewport: {
+      x: resolvedDefaultViewport.x,
+      y: resolvedDefaultViewport.y,
+      zoom: clampedDefaultZoom,
+    },
+    transform: [resolvedInitialViewport.x, resolvedInitialViewport.y, initialZoom] as [
       number,
       number,
       number,
@@ -49,10 +59,17 @@ export default function StoreProvider(props: StoreProviderProps) {
     () => ({
       minZoom: state.minZoom,
       maxZoom: state.maxZoom,
-      initialZoom: state.initialZoom,
+      defaultViewport: state.defaultViewport,
       panZoom: state.panZoom,
     }),
-    [state.minZoom, state.maxZoom, state.initialZoom, state.panZoom],
+    [
+      state.minZoom,
+      state.maxZoom,
+      state.defaultViewport.x,
+      state.defaultViewport.y,
+      state.defaultViewport.zoom,
+      state.panZoom,
+    ],
   );
   const reactiveValue = useMemo(
     () => ({

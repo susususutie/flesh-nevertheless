@@ -1,15 +1,22 @@
-import { useEffect, useRef, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode, useCallback } from "react";
 import useDispatch from "../hooks/useDispatch";
 import useData from "../hooks/useData";
 import useReactive from "../hooks/useReactive";
 import PanZoom from "../helper/PanZoom";
-import { type Transform } from "../types";
+import { type Transform, type RootPropsType } from "../types";
+
+type ZoomPaneProps = {
+  children: ReactNode;
+  isControlledViewport: boolean;
+} & Pick<RootPropsType, "defaultViewport" | "onViewportChange">;
 
 /**
  * TODO 实现有问题
  
  */
-export default function ZoomPane({ children }: { children: ReactNode }) {
+export default function ZoomPane(props: ZoomPaneProps) {
+  const { children, isControlledViewport, onViewportChange } = props;
+
   const dispatch = useDispatch();
   const data = useData();
   const reactive = useReactive();
@@ -18,11 +25,20 @@ export default function ZoomPane({ children }: { children: ReactNode }) {
   const transform = useRef<Transform>(reactive.transform);
   const minZoomRef = useRef(data.minZoom);
   const maxZoomRef = useRef(data.maxZoom);
+  const defaultViewportRef = useRef(data.defaultViewport);
+
   const lastPointerRef = useRef<{ x: number; y: number } | null>(null);
 
-  transform.current = reactive.transform;
-  minZoomRef.current = data.minZoom;
-  maxZoomRef.current = data.maxZoom;
+  const onTransformChange = useCallback(
+    (transform: Transform) => {
+      onViewportChange?.({ x: transform[0], y: transform[1], zoom: transform[2] });
+
+      if (!isControlledViewport) {
+        dispatch({ type: "transform", payload: transform });
+      }
+    },
+    [onViewportChange, isControlledViewport],
+  );
 
   const panZoom = useRef<PanZoom | null>(null);
   useEffect(() => {
@@ -31,7 +47,8 @@ export default function ZoomPane({ children }: { children: ReactNode }) {
         el: rootRef.current,
         minZoom: minZoomRef.current,
         maxZoom: maxZoomRef.current,
-        transform: transform.current,
+        viewport: defaultViewportRef.current,
+        onTransformChange,
       });
       dispatch({ type: "setPanZoom", payload: panZoom.current });
       return () => {
@@ -89,18 +106,21 @@ export default function ZoomPane({ children }: { children: ReactNode }) {
       dispatch({ type: "transform", payload: [nextX, nextY, nextZoom] });
     };
 
+    // TODO
     const onWheel = (e: WheelEvent) => {
+      console.log("onWheel", e);
       const currentZoom = transform.current[2];
       const sensitivity = e.ctrlKey ? 0.01 : 0.003;
       const factor = getWheelFactor(e.deltaY, sensitivity);
       const nextZoomRaw = currentZoom * factor;
       const origin = getLocalPoint(e.clientX, e.clientY);
       lastPointerRef.current = origin;
-      dispatchZoomAroundPoint(nextZoomRaw, origin);
+      // dispatchZoomAroundPoint(nextZoomRaw, origin);
       e.preventDefault();
     };
 
     const onTouchStart = (e: TouchEvent) => {
+      console.log("onTouchStart", e);
       if (e.touches.length !== 2) return;
       pinchStartDistanceRef.current = getDistance(e.touches);
       pinchStartZoomRef.current = transform.current[2];
@@ -108,6 +128,8 @@ export default function ZoomPane({ children }: { children: ReactNode }) {
     };
 
     const onTouchMove = (e: TouchEvent) => {
+      console.log("onTouchMove", e);
+
       if (e.touches.length !== 2) return;
 
       const startDistance = pinchStartDistanceRef.current;
@@ -129,11 +151,13 @@ export default function ZoomPane({ children }: { children: ReactNode }) {
     let gestureStartZoom: number | null = null;
 
     const onGestureStart = (e: Event) => {
+      console.log("onGestureStart", e);
       gestureStartZoom = transform.current[2];
       (e as Event).preventDefault?.();
     };
 
     const onGestureChange = (e: Event) => {
+      console.log("onGestureChange", e);
       if (gestureStartZoom === null) return;
       const scale = (e as any).scale;
       if (typeof scale !== "number" || !Number.isFinite(scale) || scale <= 0) return;
@@ -143,6 +167,7 @@ export default function ZoomPane({ children }: { children: ReactNode }) {
     };
 
     const onGestureEnd = (e: Event) => {
+      console.log("onGestureEnd", e);
       gestureStartZoom = null;
       (e as Event).preventDefault?.();
     };
@@ -181,7 +206,6 @@ export default function ZoomPane({ children }: { children: ReactNode }) {
       passive: false,
     } as AddEventListenerOptions);
     el.addEventListener("gestureend", onGestureEnd, { passive: false } as AddEventListenerOptions);
-    // el.addEventListener("dblclick", onDoubleClick);
 
     return () => {
       el.removeEventListener("wheel", onWheel);
@@ -204,11 +228,7 @@ export default function ZoomPane({ children }: { children: ReactNode }) {
     const onDoubleClick = (e: MouseEvent) => {
       e.preventDefault();
       if (!panZoom.current) return;
-      const transform = panZoom.current.zoomIn({ x: e.clientX, y: e.clientY });
-
-      if (!transform) return;
-
-      dispatch({ type: "transform", payload: transform });
+      panZoom.current.zoomIn({ x: e.clientX, y: e.clientY });
     };
 
     container.addEventListener("dblclick", onDoubleClick);
