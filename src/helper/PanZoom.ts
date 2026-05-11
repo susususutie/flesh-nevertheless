@@ -1,4 +1,5 @@
-type Transform = { x: number; y: number; zoom: number };
+import { type Transform } from "../types";
+
 type Options = {
   el: HTMLElement;
   minZoom: number;
