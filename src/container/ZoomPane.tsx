@@ -3,6 +3,7 @@ import useDispatch from "../hooks/useDispatch";
 import useData from "../hooks/useData";
 import useReactive from "../hooks/useReactive";
 import PanZoom from "../helper/PanZoom";
+import { type Transform } from "../types";
 
 /**
  * TODO 实现有问题
@@ -14,31 +15,28 @@ export default function ZoomPane({ children }: { children: ReactNode }) {
   const reactive = useReactive();
 
   const rootRef = useRef<HTMLDivElement | null>(null);
-  const xRef = useRef(reactive.transform.x);
-  const yRef = useRef(reactive.transform.y);
-  const zoomRef = useRef(reactive.transform.zoom);
+  const transform = useRef<Transform>(reactive.transform);
   const minZoomRef = useRef(data.minZoom);
   const maxZoomRef = useRef(data.maxZoom);
   const lastPointerRef = useRef<{ x: number; y: number } | null>(null);
 
-  xRef.current = reactive.transform.x;
-  yRef.current = reactive.transform.y;
+  transform.current = reactive.transform;
   minZoomRef.current = data.minZoom;
   maxZoomRef.current = data.maxZoom;
-  zoomRef.current = reactive.transform.zoom;
 
-  const panZoom = useRef<PanZoom>(null);
+  const panZoom = useRef<PanZoom | null>(null);
   useEffect(() => {
     if (rootRef.current) {
       panZoom.current = new PanZoom({
         el: rootRef.current,
         minZoom: minZoomRef.current,
         maxZoom: maxZoomRef.current,
-        transform: { x: 0, y: 0, zoom: 100 },
+        transform: transform.current,
       });
       dispatch({ type: "setPanZoom", payload: panZoom.current });
       return () => {
         panZoom.current?.destroy();
+        dispatch({ type: "setPanZoom", payload: null });
       };
     }
   }, []);
@@ -78,21 +76,21 @@ export default function ZoomPane({ children }: { children: ReactNode }) {
     };
 
     const dispatchZoomAroundPoint = (nextZoom: number, origin: { x: number; y: number }) => {
-      const currentZoom = zoomRef.current;
+      const currentZoom = transform.current[2];
       if (!Number.isFinite(currentZoom) || currentZoom <= 0) return;
 
       const ratio = nextZoom / currentZoom;
-      const currentX = xRef.current;
-      const currentY = yRef.current;
+      const currentX = transform.current[0];
+      const currentY = transform.current[1];
 
       const nextX = origin.x - ratio * (origin.x - currentX);
       const nextY = origin.y - ratio * (origin.y - currentY);
 
-      dispatch({ type: "transform", payload: { x: nextX, y: nextY, zoom: nextZoom } });
+      dispatch({ type: "transform", payload: [nextX, nextY, nextZoom] });
     };
 
     const onWheel = (e: WheelEvent) => {
-      const currentZoom = zoomRef.current;
+      const currentZoom = transform.current[2];
       const sensitivity = e.ctrlKey ? 0.01 : 0.003;
       const factor = getWheelFactor(e.deltaY, sensitivity);
       const nextZoomRaw = currentZoom * factor;
@@ -105,7 +103,7 @@ export default function ZoomPane({ children }: { children: ReactNode }) {
     const onTouchStart = (e: TouchEvent) => {
       if (e.touches.length !== 2) return;
       pinchStartDistanceRef.current = getDistance(e.touches);
-      pinchStartZoomRef.current = zoomRef.current;
+      pinchStartZoomRef.current = transform.current[2];
       e.preventDefault();
     };
 
@@ -131,7 +129,7 @@ export default function ZoomPane({ children }: { children: ReactNode }) {
     let gestureStartZoom: number | null = null;
 
     const onGestureStart = (e: Event) => {
-      gestureStartZoom = zoomRef.current;
+      gestureStartZoom = transform.current[2];
       (e as Event).preventDefault?.();
     };
 

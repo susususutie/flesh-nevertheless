@@ -22,8 +22,8 @@ export default function Controls(props: ControlsProps) {
   const reactive = useReactive();
   const dispatch = useDispatch();
 
-  const minZoomReached = reactive.transform.zoom <= data.minZoom;
-  const maxZoomReached = reactive.transform.zoom >= data.maxZoom;
+  const minZoomReached = reactive.transform[2] <= data.minZoom;
+  const maxZoomReached = reactive.transform[2] >= data.maxZoom;
 
   // 基于画框中心点缩放
   const handleZoomIn = () => {

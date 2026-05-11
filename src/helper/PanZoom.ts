@@ -9,7 +9,7 @@ type Options = {
 
 /** 参考 d3-zoom 实现一个 PanZoom 类 */
 class PanZoom {
-  private el: HTMLElement;
+  private el: HTMLElement | null;
   private minZoom: number;
   private maxZoom: number;
   private transform: Transform;
@@ -26,7 +26,7 @@ class PanZoom {
   }
 
   #getLocalCoords(clientX: number, clientY: number) {
-    const rect = this.el.getBoundingClientRect();
+    const rect = this.el?.getBoundingClientRect();
     if (!rect) return { x: 0, y: 0 };
     return {
       x: clientX - rect.left,
@@ -37,9 +37,9 @@ class PanZoom {
   #zoomAtClient(clientX: number, clientY: number, nextZoomRaw: number) {
     // 限制缩放范围
     const clampedZoom = Math.max(this.minZoom, Math.min(this.maxZoom, nextZoomRaw));
-    const currentZoom = this.transform.zoom;
-    const currentX = this.transform.x;
-    const currentY = this.transform.y;
+    const currentZoom = this.transform[2];
+    const currentX = this.transform[0];
+    const currentY = this.transform[1];
 
     if (currentZoom === 0) return;
     if (clampedZoom === currentZoom) return;
@@ -51,17 +51,17 @@ class PanZoom {
     const nextX = originX - (originX - currentX) * ratio;
     const nextY = originY - (originY - currentY) * ratio;
 
-    return { x: nextX, y: nextY, zoom: clampedZoom };
+    return [nextX, nextY, clampedZoom] as Transform;
   }
 
-  zoomIn(config?: { x: number; y: number }): { x: number; y: number; zoom: number } {
-    if (this.destroyed) return;
+  zoomIn(config?: { x: number; y: number }): Transform | null {
+    if (this.destroyed) return null;
 
     let clientX = 0;
     let clientY = 0;
     if (!config) {
-      const rect = this.el.getBoundingClientRect();
-      if (!rect) return;
+      const rect = this.el?.getBoundingClientRect();
+      if (!rect) return null;
 
       clientX = rect.width / 2 + rect.left;
       clientY = rect.height / 2 + rect.top;
@@ -70,27 +70,27 @@ class PanZoom {
       clientY = config.y;
     }
 
-    const transform = this.#zoomAtClient(clientX, clientY, this.transform.zoom * 1.2);
+    const transform = this.#zoomAtClient(clientX, clientY, this.transform[2] * 1.2);
 
-    if (!transform) return;
+    if (!transform) return null;
 
     this.transform = transform;
     return transform;
   }
 
-  zoomOut(): { x: number; y: number; zoom: number } | null {
-    if (this.destroyed) return;
-    const rect = this.el.getBoundingClientRect();
-    if (!rect) return;
+  zoomOut(): Transform | null {
+    if (this.destroyed) return null;
+    const rect = this.el?.getBoundingClientRect();
+    if (!rect) return null;
 
     const centerClient = {
       x: rect.width / 2 + rect.left,
       y: rect.height / 2 + rect.top,
     };
 
-    const transform = this.#zoomAtClient(centerClient.x, centerClient.y, this.transform.zoom * 0.8);
+    const transform = this.#zoomAtClient(centerClient.x, centerClient.y, this.transform[2] * 0.8);
 
-    if (!transform) return;
+    if (!transform) return null;
 
     this.transform = transform;
     return transform;

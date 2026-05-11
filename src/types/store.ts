@@ -8,7 +8,7 @@ export type StoreConfig = {
 
 // data 业务状态，中低频变化（秒级/分钟级）
 export type StoreData = {
-  minZoom: number; // 缩放百分比，整数
+  minZoom: number; // 缩放比例（scale）
   maxZoom: number;
   initialZoom: number;
   panZoom: PanZoom | null;

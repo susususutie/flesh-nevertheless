@@ -55,8 +55,8 @@ function styleAreEqual(
   if (!prevStyle || !nextStyle) return false;
 
   // 获取所有 keys
-  const prevKeys = Object.keys(prevStyle);
-  const nextKeys = Object.keys(nextStyle);
+  const prevKeys = Object.keys(prevStyle) as (keyof CSSProperties)[];
+  const nextKeys = Object.keys(nextStyle) as (keyof CSSProperties)[];
 
   // 数量不同
   if (prevKeys.length !== nextKeys.length) return false;
@@ -77,15 +77,18 @@ function propsAreEqual<P extends object>(prevProps: Readonly<P>, nextProps: Read
   if (prevProps === nextProps) return true;
 
   // 获取所有 props keys
-  const allKeys = new Set([...Object.keys(prevProps), ...Object.keys(nextProps)]);
+  const allKeys = new Set<keyof P>([
+    ...(Object.keys(prevProps) as (keyof P)[]),
+    ...(Object.keys(nextProps) as (keyof P)[]),
+  ]);
 
   for (let key of allKeys) {
     const prevValue = prevProps[key];
     const nextValue = nextProps[key];
 
     // style 使用自定义比较
-    if (key === "style") {
-      if (!styleAreEqual(prevValue, nextValue)) {
+    if (key === ("style" as keyof P)) {
+      if (!styleAreEqual(prevValue as CSSProperties, nextValue as CSSProperties)) {
         return false;
       }
     }

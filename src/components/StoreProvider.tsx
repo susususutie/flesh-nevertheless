@@ -26,10 +26,11 @@ function initState(props: StoreProviderProps): StoreStateType {
     initialZoom,
     minZoom: props.minZoom ?? initialState.minZoom,
     maxZoom: props.maxZoom ?? initialState.maxZoom,
-    transform: {
-      ...initialState.transform,
-      zoom: initialZoom,
-    },
+    transform: [initialState.transform[0], initialState.transform[1], initialZoom] as [
+      number,
+      number,
+      number,
+    ],
   };
   return state;
 }
@@ -55,11 +56,7 @@ export default function StoreProvider(props: StoreProviderProps) {
   );
   const reactiveValue = useMemo(
     () => ({
-      transform: {
-        x: state.transform.x,
-        y: state.transform.y,
-        zoom: state.transform.zoom,
-      },
+      transform: state.transform,
       mousePosition: { x: state.mousePosition.x, y: state.mousePosition.y },
       selectedPoint: state.selectedPoint
         ? { x: state.selectedPoint.x, y: state.selectedPoint.y }
@@ -67,9 +64,9 @@ export default function StoreProvider(props: StoreProviderProps) {
       isPanning: state.isPanning,
     }),
     [
-      state.transform.x,
-      state.transform.y,
-      state.transform.zoom,
+      state.transform[0],
+      state.transform[1],
+      state.transform[2],
       state.mousePosition.x,
       state.mousePosition.y,
       state.selectedPoint?.x,

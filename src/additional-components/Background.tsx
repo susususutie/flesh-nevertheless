@@ -14,9 +14,9 @@ export default function Background(props: BackgroundProps) {
   const { id: _backgroundId, gap = 20, size = 2, color = "#cdcdcd", bgColor } = props;
   const { id } = useConfig();
   const reactive = useReactive();
-  const { x, y, zoom } = reactive.transform;
+  const [x, y, zoom] = reactive.transform;
 
-  const scale = zoom / 100;
+  const scale = zoom;
   const gapXY: [number, number] = Array.isArray(gap) ? gap : [gap, gap];
   const scaledGap: [number, number] = [gapXY[0] * scale || 1, gapXY[1] * scale || 1];
   const scaledSize = size * scale;

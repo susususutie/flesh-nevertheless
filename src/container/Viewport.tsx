@@ -3,7 +3,7 @@ import useReactive from "../hooks/useReactive";
 
 export default function Viewport({ children }: { children: ReactNode }) {
   const reactive = useReactive();
-  const transform = `translate(${reactive.transform.x}px,${reactive.transform.y}px) scale(${reactive.transform.zoom / 100})`;
+  const transform = `translate(${reactive.transform[0]}px,${reactive.transform[1]}px) scale(${reactive.transform[2]})`;
 
   return (
     <div
