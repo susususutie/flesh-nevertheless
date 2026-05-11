@@ -9,7 +9,6 @@ export type StoreConfig = {
 export type StoreData = {
   minZoom: number; // 缩放百分比，整数
   maxZoom: number;
-  zoomStep: number;
   initialZoom: number;
   panZoom: PanZoom | null;
 };

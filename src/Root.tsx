@@ -15,11 +15,10 @@ type RootPropsType = HTMLAttributes<HTMLDivElement> & {
   initialZoom?: number;
   minZoom?: number;
   maxZoom?: number;
-  zoomStep?: number;
 };
 
 function Root(props: RootPropsType) {
-  const { id: _id, style, children, initialZoom, minZoom, maxZoom, zoomStep } = props;
+  const { id: _id, style, children, initialZoom, minZoom, maxZoom } = props;
 
   const id = _id ?? `Root-${useId()}`;
   // console.log("Root render", id);
@@ -30,20 +29,9 @@ function Root(props: RootPropsType) {
       style={{ position: "relative", width: "100%", height: "100%", overflow: "hidden", ...style }}
     >
       {/* 根据 props 初始化全局状态  */}
-      <StoreProvider
-        id={id}
-        initialZoom={initialZoom}
-        zoomStep={zoomStep}
-        minZoom={minZoom}
-        maxZoom={maxZoom}
-      >
+      <StoreProvider id={id} initialZoom={initialZoom} minZoom={minZoom} maxZoom={maxZoom}>
         {/* 后续 props 变更，同步到全局状态 */}
-        <StoreUpdater
-          initialZoom={initialZoom}
-          zoomStep={zoomStep}
-          minZoom={minZoom}
-          maxZoom={maxZoom}
-        />
+        <StoreUpdater initialZoom={initialZoom} minZoom={minZoom} maxZoom={maxZoom} />
         <ZoomPane>
           <Pane>
             <Viewport>

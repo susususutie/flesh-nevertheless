@@ -56,7 +56,7 @@ export default function storeReducer(state: StoreStateType, action: StoreAction)
     case "reset":
       return { ...state, transform: { ...state.transform, zoom: state.initialZoom } };
     case "incrementZoom": {
-      let newZoom = Math.round(state.transform.zoom + state.zoomStep);
+      let newZoom = Math.round(state.transform.zoom * 1.2);
       newZoom = Math.max(Math.min(newZoom, state.maxZoom), state.minZoom);
       if (newZoom === state.transform.zoom) {
         return state;
@@ -64,7 +64,7 @@ export default function storeReducer(state: StoreStateType, action: StoreAction)
       return { ...state, transform: { ...state.transform, zoom: newZoom } };
     }
     case "decrementZoom": {
-      let newZoom = Math.round(state.transform.zoom - state.zoomStep);
+      let newZoom = Math.round(state.transform.zoom * 0.8);
       newZoom = Math.max(Math.min(newZoom, state.maxZoom), state.minZoom);
       if (newZoom === state.transform.zoom) {
         return state;

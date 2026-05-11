@@ -19,7 +19,6 @@ export default function ZoomPane({ children }: { children: ReactNode }) {
   const zoomRef = useRef(reactive.transform.zoom);
   const minZoomRef = useRef(data.minZoom);
   const maxZoomRef = useRef(data.maxZoom);
-  const zoomStepRef = useRef(data.zoomStep);
   const lastPointerRef = useRef<{ x: number; y: number } | null>(null);
 
   xRef.current = reactive.transform.x;
@@ -27,7 +26,6 @@ export default function ZoomPane({ children }: { children: ReactNode }) {
   minZoomRef.current = data.minZoom;
   maxZoomRef.current = data.maxZoom;
   zoomRef.current = reactive.transform.zoom;
-  zoomStepRef.current = data.zoomStep;
 
   const panZoom = useRef<PanZoom>(null);
   useEffect(() => {
@@ -36,7 +34,6 @@ export default function ZoomPane({ children }: { children: ReactNode }) {
         el: rootRef.current,
         minZoom: minZoomRef.current,
         maxZoom: maxZoomRef.current,
-        zoomStep: zoomStepRef.current,
         transform: { x: 0, y: 0, zoom: 100 },
       });
       dispatch({ type: "setPanZoom", payload: panZoom.current });
@@ -213,10 +210,7 @@ export default function ZoomPane({ children }: { children: ReactNode }) {
 
       if (!transform) return;
 
-      dispatch({
-        type: "transform",
-        payload: transform,
-      });
+      dispatch({ type: "transform", payload: transform });
     };
 
     container.addEventListener("dblclick", onDoubleClick);

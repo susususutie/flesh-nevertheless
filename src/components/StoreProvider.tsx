@@ -12,7 +12,6 @@ type StoreProviderProps = {
 
   minZoom?: number;
   maxZoom?: number;
-  zoomStep?: number;
   initialZoom?: number;
 
   children: ReactNode;
@@ -27,7 +26,6 @@ function initState(props: StoreProviderProps): StoreStateType {
     initialZoom,
     minZoom: props.minZoom ?? initialState.minZoom,
     maxZoom: props.maxZoom ?? initialState.maxZoom,
-    zoomStep: props.zoomStep ?? initialState.zoomStep,
     transform: {
       ...initialState.transform,
       zoom: initialZoom,
@@ -50,11 +48,10 @@ export default function StoreProvider(props: StoreProviderProps) {
     () => ({
       minZoom: state.minZoom,
       maxZoom: state.maxZoom,
-      zoomStep: state.zoomStep,
       initialZoom: state.initialZoom,
       panZoom: state.panZoom,
     }),
-    [state.minZoom, state.maxZoom, state.zoomStep, state.initialZoom, state.panZoom],
+    [state.minZoom, state.maxZoom, state.initialZoom, state.panZoom],
   );
   const reactiveValue = useMemo(
     () => ({

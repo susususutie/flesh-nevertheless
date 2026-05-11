@@ -3,7 +3,6 @@ type Options = {
   el: HTMLElement;
   minZoom: number;
   maxZoom: number;
-  zoomStep: number;
   transform: Transform;
 };
 
@@ -12,7 +11,6 @@ class PanZoom {
   private el: HTMLElement;
   private minZoom: number;
   private maxZoom: number;
-  private zoomStep: number;
   private transform: Transform;
   private destroyed: boolean;
 
@@ -22,7 +20,6 @@ class PanZoom {
     this.el = options.el;
     this.minZoom = options.minZoom;
     this.maxZoom = options.maxZoom;
-    this.zoomStep = options.zoomStep;
     this.transform = options.transform;
     this.destroyed = false;
   }
@@ -72,7 +69,7 @@ class PanZoom {
       clientY = config.y;
     }
 
-    const transform = this.#zoomAtClient(clientX, clientY, this.transform.zoom + this.zoomStep);
+    const transform = this.#zoomAtClient(clientX, clientY, this.transform.zoom * 1.2);
 
     if (!transform) return;
 
@@ -90,11 +87,7 @@ class PanZoom {
       y: rect.height / 2 + rect.top,
     };
 
-    const transform = this.#zoomAtClient(
-      centerClient.x,
-      centerClient.y,
-      this.transform.zoom - this.zoomStep,
-    );
+    const transform = this.#zoomAtClient(centerClient.x, centerClient.y, this.transform.zoom * 0.8);
 
     if (!transform) return;
 
