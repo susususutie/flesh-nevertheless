@@ -2,8 +2,9 @@ import StoreProvider from "./components/StoreProvider";
 import StoreUpdater from "./components/StoreUpdater";
 import NodeRenderer from "./container/NodeRenderer";
 import Pane from "./container/Pane";
-import Viewport from "./container/Viewport";
+import FlowViewport from "./container/Viewport";
 import ZoomPane from "./container/ZoomPane";
+import { type Viewport } from "./types/general";
 
 import { memo, useId, type CSSProperties, type HTMLAttributes } from "react";
 
@@ -15,6 +16,13 @@ type RootPropsType = HTMLAttributes<HTMLDivElement> & {
   initialZoom?: number;
   minZoom?: number;
   maxZoom?: number;
+
+  defaultViewport?: Viewport;
+  /**
+   * 手动传入 viewport 时，受控模式，viewport 变更时触发 onViewportChange
+   */
+  viewport?: Viewport;
+  onViewportChange?: (viewport: Viewport) => void;
 };
 
 function Root(props: RootPropsType) {
@@ -34,9 +42,9 @@ function Root(props: RootPropsType) {
         <StoreUpdater initialZoom={initialZoom} minZoom={minZoom} maxZoom={maxZoom} />
         <ZoomPane>
           <Pane>
-            <Viewport>
+            <FlowViewport>
               <NodeRenderer />
-            </Viewport>
+            </FlowViewport>
           </Pane>
         </ZoomPane>
         {children}
