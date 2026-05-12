@@ -16,7 +16,6 @@ type StoreProviderProps = {
   | "maxZoom"
   | "defaultViewport"
   | "viewport"
-  | "onViewportChange"
   | "zoomOnScroll"
   | "zoomOnPinch"
   | "zoomOnDoubleClick"

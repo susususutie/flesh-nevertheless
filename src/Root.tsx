@@ -40,7 +40,6 @@ function Root(props: RootPropsType) {
         maxZoom={maxZoom}
         defaultViewport={defaultViewport}
         viewport={viewport}
-        onViewportChange={onViewportChange}
         zoomOnScroll={zoomOnScroll}
         zoomOnPinch={zoomOnPinch}
         zoomOnDoubleClick={zoomOnDoubleClick}
