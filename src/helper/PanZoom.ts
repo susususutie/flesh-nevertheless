@@ -6,6 +6,7 @@ type Options = {
   maxZoom: number;
   viewport: Viewport;
   onTransformChange: (transform: Transform) => void;
+  isInteractive?: boolean;
   zoomOnScroll?: boolean;
   zoomOnPinch?: boolean;
   zoomOnDoubleClick?: boolean;
@@ -20,6 +21,7 @@ class PanZoom {
   private viewport: Viewport;
   private onTransformChange: (transform: Transform) => void;
   private destroyed: boolean;
+  private isInteractive: boolean;
   private zoomOnScroll: boolean;
   private zoomOnPinch: boolean;
   private zoomOnDoubleClick: boolean;
@@ -45,6 +47,7 @@ class PanZoom {
     this.viewport = options.viewport;
     this.onTransformChange = options.onTransformChange;
     this.destroyed = false;
+    this.isInteractive = options.isInteractive ?? true;
     this.zoomOnScroll = options.zoomOnScroll ?? true;
     this.zoomOnPinch = options.zoomOnPinch ?? true;
     this.zoomOnDoubleClick = options.zoomOnDoubleClick ?? true;
@@ -69,6 +72,7 @@ class PanZoom {
 
     const onWheel = (event: WheelEvent) => {
       if (this.destroyed) return;
+      if (!this.isInteractive) return;
       if (!this.zoomOnScroll && !this.panOnScroll) return;
       event.preventDefault();
 
@@ -86,6 +90,7 @@ class PanZoom {
 
     const onDblClick = (event: MouseEvent) => {
       if (this.destroyed) return;
+      if (!this.isInteractive) return;
       if (!this.zoomOnDoubleClick) return;
       event.preventDefault();
       this.zoomIn({ x: event.clientX, y: event.clientY });
@@ -93,6 +98,7 @@ class PanZoom {
 
     const onMouseDown = (event: MouseEvent) => {
       if (this.destroyed) return;
+      if (!this.isInteractive) return;
       if (event.button !== 0) return;
       this.mouseDown = true;
       this.panStartClient = { x: event.clientX, y: event.clientY };
@@ -102,6 +108,7 @@ class PanZoom {
 
     const onMouseMove = (event: MouseEvent) => {
       if (this.destroyed) return;
+      if (!this.isInteractive) return;
       if (!this.mouseDown || !this.panStartClient || !this.panStartViewport) return;
       const dx = event.clientX - this.panStartClient.x;
       const dy = event.clientY - this.panStartClient.y;
@@ -121,11 +128,13 @@ class PanZoom {
 
     const onTouchStart = (event: TouchEvent) => {
       if (this.destroyed) return;
+      if (!this.isInteractive) return;
       this.#handleTouchStart(event);
     };
 
     const onTouchMove = (event: TouchEvent) => {
       if (this.destroyed) return;
+      if (!this.isInteractive) return;
       this.#handleTouchMove(event);
     };
 
@@ -143,12 +152,14 @@ class PanZoom {
 
     const onGestureStart = (event: Event) => {
       if (this.destroyed) return;
+      if (!this.isInteractive) return;
       if (!this.zoomOnPinch) return;
       this.#handleGestureStart(event);
     };
 
     const onGestureChange = (event: Event) => {
       if (this.destroyed) return;
+      if (!this.isInteractive) return;
       if (!this.zoomOnPinch) return;
       this.#handleGestureChange(event);
     };
@@ -267,6 +278,7 @@ class PanZoom {
   }
 
   #handleWheel(event: WheelEvent) {
+    if (!this.isInteractive) return;
     const shouldZoom = this.zoomOnScroll && (!this.panOnScroll || event.ctrlKey);
     if (shouldZoom) {
       const anyEvent = event as unknown as { wheelDelta?: number };
@@ -412,6 +424,36 @@ class PanZoom {
 
   getViewport(): Viewport {
     return this.viewport;
+  }
+
+  setOptions(
+    options: Partial<
+      Pick<
+        Options,
+        "isInteractive" | "zoomOnScroll" | "zoomOnPinch" | "zoomOnDoubleClick" | "panOnScroll"
+      >
+    >,
+  ) {
+    if (this.destroyed) return;
+
+    if (options.isInteractive !== undefined) {
+      this.isInteractive = options.isInteractive;
+      if (!this.isInteractive) {
+        if (this.wheelRafId != null) window.cancelAnimationFrame(this.wheelRafId);
+        this.wheelRafId = null;
+        this.pendingWheelEvent = null;
+        this.mouseDown = false;
+        this.panStartClient = null;
+        this.panStartViewport = null;
+        this.#resetPinch();
+        this.gestureStartZoom = null;
+      }
+    }
+
+    if (options.zoomOnScroll !== undefined) this.zoomOnScroll = options.zoomOnScroll;
+    if (options.zoomOnPinch !== undefined) this.zoomOnPinch = options.zoomOnPinch;
+    if (options.zoomOnDoubleClick !== undefined) this.zoomOnDoubleClick = options.zoomOnDoubleClick;
+    if (options.panOnScroll !== undefined) this.panOnScroll = options.panOnScroll;
   }
 
   zoomIn(config?: { x: number; y: number }): Viewport | null {

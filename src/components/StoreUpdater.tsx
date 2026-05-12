@@ -4,14 +4,30 @@ import { type RootPropsType } from "../types";
 
 type StoreUpdaterProps = {} & Pick<
   RootPropsType,
-  "minZoom" | "maxZoom" | "defaultViewport" | "viewport"
+  | "minZoom"
+  | "maxZoom"
+  | "defaultViewport"
+  | "viewport"
+  | "zoomOnScroll"
+  | "zoomOnPinch"
+  | "zoomOnDoubleClick"
+  | "panOnScroll"
 >;
 
 /**
  * 监听 props 变化，更新 store 中的数据
  */
 export default function StoreUpdater(props: StoreUpdaterProps) {
-  const { minZoom, maxZoom, defaultViewport, viewport } = props;
+  const {
+    minZoom,
+    maxZoom,
+    defaultViewport,
+    viewport,
+    zoomOnScroll,
+    zoomOnPinch,
+    zoomOnDoubleClick,
+    panOnScroll,
+  } = props;
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -35,6 +51,21 @@ export default function StoreUpdater(props: StoreUpdaterProps) {
       dispatch({ type: "syncViewport", payload: viewport });
     }
   }, [dispatch, viewport?.x, viewport?.y, viewport?.zoom]);
+
+  useEffect(() => {
+    const payload: Partial<{
+      zoomOnScroll: boolean;
+      zoomOnPinch: boolean;
+      zoomOnDoubleClick: boolean;
+      panOnScroll: boolean;
+    }> = {};
+    if (zoomOnScroll !== undefined) payload.zoomOnScroll = zoomOnScroll;
+    if (zoomOnPinch !== undefined) payload.zoomOnPinch = zoomOnPinch;
+    if (zoomOnDoubleClick !== undefined) payload.zoomOnDoubleClick = zoomOnDoubleClick;
+    if (panOnScroll !== undefined) payload.panOnScroll = panOnScroll;
+    if (Object.keys(payload).length === 0) return;
+    dispatch({ type: "setInteractionOptions", payload });
+  }, [dispatch, zoomOnScroll, zoomOnPinch, zoomOnDoubleClick, panOnScroll]);
 
   return null;
 }

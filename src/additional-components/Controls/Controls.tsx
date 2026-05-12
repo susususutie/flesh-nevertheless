@@ -1,5 +1,6 @@
 import Panel from "../../components/Panel";
 import useData from "../../hooks/useData";
+import useDispatch from "../../hooks/useDispatch";
 import useReactive from "../../hooks/useReactive";
 import FitViewIcon from "./FitViewIcon";
 import LockIcon from "./LockIcon";
@@ -17,6 +18,7 @@ type ControlsProps = {
 export default function Controls(props: ControlsProps) {
   const { showZoom = true, showFitView = true, showInteractive = true } = props;
   const data = useData();
+  const dispatch = useDispatch();
   const panZoom = data.panZoom;
   const reactive = useReactive();
 
@@ -25,8 +27,6 @@ export default function Controls(props: ControlsProps) {
 
   // 基于画框中心点缩放
   const handleZoomIn = () => {
-    //
-    console.log(reactive.transform);
     if (maxZoomReached) return;
     if (panZoom) {
       panZoom.zoomIn();
@@ -39,8 +39,10 @@ export default function Controls(props: ControlsProps) {
     }
   };
 
-  // const
-  const isInteractive = false;
+  const isInteractive = data.isInteractive;
+  const handleToggleInteractivity = () => {
+    dispatch({ type: "toggleInteractivity" });
+  };
   return (
     <Panel
       position="bottom-left"
@@ -66,7 +68,9 @@ export default function Controls(props: ControlsProps) {
         </button>
       ) : null}
       {showInteractive ? (
-        <button className="control-button">{isInteractive ? <UnlockIcon /> : <LockIcon />}</button>
+        <button className="control-button" onClick={handleToggleInteractivity}>
+          {isInteractive ? <UnlockIcon /> : <LockIcon />}
+        </button>
       ) : null}
     </Panel>
   );

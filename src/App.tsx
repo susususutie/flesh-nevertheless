@@ -16,8 +16,7 @@ export default function App() {
         </button>
       </div>
 
-      <Root style={{ width: 300, height: 200, border: "1px solid" }}>
-        1. Hello React + TypeScript!
+      <Root style={{ width: "100%", height: 400, border: "1px solid" }}>
         <Toolbar>
           <DisplayZoom />
           <ZoomController />
@@ -28,18 +27,14 @@ export default function App() {
       </Root>
 
       <Root style={{ width: 300, height: 200, border: "1px solid" }}>
-        2. Hello React + TypeScript!
         <Toolbar>
           <DisplayZoom />
-          <ZoomController />
         </Toolbar>
       </Root>
 
       <Root style={{ width: 300, height: 200, border: "1px solid" }}>
-        3. Hello React + TypeScript!
         <Toolbar>
           <DisplayZoom />
-          <ZoomController />
         </Toolbar>
       </Root>
     </div>

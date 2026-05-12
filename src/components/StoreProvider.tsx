@@ -12,13 +12,25 @@ type StoreProviderProps = {
   children: ReactNode;
 } & Pick<
   RootPropsType,
-  "minZoom" | "maxZoom" | "defaultViewport" | "viewport" | "onViewportChange"
+  | "minZoom"
+  | "maxZoom"
+  | "defaultViewport"
+  | "viewport"
+  | "onViewportChange"
+  | "zoomOnScroll"
+  | "zoomOnPinch"
+  | "zoomOnDoubleClick"
+  | "panOnScroll"
 >;
 
 function initState(props: StoreProviderProps): StoreStateType {
   const minZoom = props.minZoom ?? initialState.minZoom;
   const maxZoom = props.maxZoom ?? initialState.maxZoom;
   const resolvedDefaultViewport = props.defaultViewport ?? initialState.defaultViewport;
+  const zoomOnScroll = props.zoomOnScroll ?? initialState.zoomOnScroll;
+  const zoomOnPinch = props.zoomOnPinch ?? initialState.zoomOnPinch;
+  const zoomOnDoubleClick = props.zoomOnDoubleClick ?? initialState.zoomOnDoubleClick;
+  const panOnScroll = props.panOnScroll ?? initialState.panOnScroll;
   const isControlled = props.viewport !== undefined;
   const resolvedInitialViewport = props.viewport ?? resolvedDefaultViewport;
   const initialZoom = isControlled
@@ -36,6 +48,10 @@ function initState(props: StoreProviderProps): StoreStateType {
       y: resolvedDefaultViewport.y,
       zoom: clampedDefaultZoom,
     },
+    zoomOnScroll,
+    zoomOnPinch,
+    zoomOnDoubleClick,
+    panOnScroll,
     transform: [resolvedInitialViewport.x, resolvedInitialViewport.y, initialZoom] as [
       number,
       number,
@@ -61,6 +77,11 @@ export default function StoreProvider(props: StoreProviderProps) {
       maxZoom: state.maxZoom,
       defaultViewport: state.defaultViewport,
       panZoom: state.panZoom,
+      isInteractive: state.isInteractive,
+      zoomOnScroll: state.zoomOnScroll,
+      zoomOnPinch: state.zoomOnPinch,
+      zoomOnDoubleClick: state.zoomOnDoubleClick,
+      panOnScroll: state.panOnScroll,
     }),
     [
       state.minZoom,
@@ -69,6 +90,11 @@ export default function StoreProvider(props: StoreProviderProps) {
       state.defaultViewport.y,
       state.defaultViewport.zoom,
       state.panZoom,
+      state.isInteractive,
+      state.zoomOnScroll,
+      state.zoomOnPinch,
+      state.zoomOnDoubleClick,
+      state.panOnScroll,
     ],
   );
   const reactiveValue = useMemo(

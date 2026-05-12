@@ -19,6 +19,10 @@ function Root(props: RootPropsType) {
     defaultViewport = initViewport,
     viewport,
     onViewportChange,
+    zoomOnScroll,
+    zoomOnPinch,
+    zoomOnDoubleClick,
+    panOnScroll,
   } = props;
 
   const id = _id ?? `Root-${useId()}`;
@@ -37,6 +41,10 @@ function Root(props: RootPropsType) {
         defaultViewport={defaultViewport}
         viewport={viewport}
         onViewportChange={onViewportChange}
+        zoomOnScroll={zoomOnScroll}
+        zoomOnPinch={zoomOnPinch}
+        zoomOnDoubleClick={zoomOnDoubleClick}
+        panOnScroll={panOnScroll}
       >
         {/* 后续 props 变更，同步到全局状态 */}
         <StoreUpdater
@@ -44,6 +52,10 @@ function Root(props: RootPropsType) {
           maxZoom={maxZoom}
           defaultViewport={defaultViewport}
           viewport={viewport}
+          zoomOnScroll={zoomOnScroll}
+          zoomOnPinch={zoomOnPinch}
+          zoomOnDoubleClick={zoomOnDoubleClick}
+          panOnScroll={panOnScroll}
         />
         <ZoomPane isControlledViewport={!!viewport} onViewportChange={onViewportChange}>
           <Pane>

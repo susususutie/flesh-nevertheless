@@ -7,7 +7,7 @@ import { type Transform, type RootPropsType } from "../types";
 type ZoomPaneProps = {
   children: ReactNode;
   isControlledViewport: boolean;
-} & Pick<RootPropsType, "defaultViewport" | "onViewportChange">;
+} & Pick<RootPropsType, "onViewportChange">;
 
 /**
  * TODO 实现有问题
@@ -20,9 +20,6 @@ export default function ZoomPane(props: ZoomPaneProps) {
   const data = useData();
 
   const rootRef = useRef<HTMLDivElement | null>(null);
-  const minZoomRef = useRef(data.minZoom);
-  const maxZoomRef = useRef(data.maxZoom);
-  const defaultViewportRef = useRef(data.defaultViewport);
 
   const onTransformChange = useCallback(
     (transform: Transform) => {
@@ -40,14 +37,15 @@ export default function ZoomPane(props: ZoomPaneProps) {
     if (rootRef.current) {
       panZoom.current = new PanZoom({
         el: rootRef.current,
-        minZoom: minZoomRef.current,
-        maxZoom: maxZoomRef.current,
-        viewport: defaultViewportRef.current,
+        minZoom: data.minZoom,
+        maxZoom: data.maxZoom,
+        viewport: data.defaultViewport,
+        isInteractive: data.isInteractive,
+        zoomOnScroll: data.zoomOnScroll,
+        zoomOnPinch: data.zoomOnPinch,
+        zoomOnDoubleClick: data.zoomOnDoubleClick,
+        panOnScroll: data.panOnScroll,
         onTransformChange,
-        zoomOnScroll: true,
-        zoomOnPinch: true,
-        zoomOnDoubleClick: true,
-        panOnScroll: false,
       });
       dispatch({ type: "setPanZoom", payload: panZoom.current });
       return () => {
@@ -56,6 +54,22 @@ export default function ZoomPane(props: ZoomPaneProps) {
       };
     }
   }, []);
+
+  useEffect(() => {
+    panZoom.current?.setOptions({
+      isInteractive: data.isInteractive,
+      zoomOnScroll: data.zoomOnScroll,
+      zoomOnPinch: data.zoomOnPinch,
+      zoomOnDoubleClick: data.zoomOnDoubleClick,
+      panOnScroll: data.panOnScroll,
+    });
+  }, [
+    data.isInteractive,
+    data.zoomOnScroll,
+    data.zoomOnPinch,
+    data.zoomOnDoubleClick,
+    data.panOnScroll,
+  ]);
 
   return (
     <div

@@ -99,32 +99,57 @@ export default function storeReducer(state: StoreStateType, action: StoreAction)
         defaultViewport: { ...state.defaultViewport, zoom: nextDefaultZoom },
       };
     }
+    case "setInteractionOptions": {
+      const nextZoomOnScroll =
+        action.payload.zoomOnScroll !== undefined
+          ? action.payload.zoomOnScroll
+          : state.zoomOnScroll;
+      const nextZoomOnPinch =
+        action.payload.zoomOnPinch !== undefined ? action.payload.zoomOnPinch : state.zoomOnPinch;
+      const nextZoomOnDoubleClick =
+        action.payload.zoomOnDoubleClick !== undefined
+          ? action.payload.zoomOnDoubleClick
+          : state.zoomOnDoubleClick;
+      const nextPanOnScroll =
+        action.payload.panOnScroll !== undefined ? action.payload.panOnScroll : state.panOnScroll;
+
+      if (
+        nextZoomOnScroll === state.zoomOnScroll &&
+        nextZoomOnPinch === state.zoomOnPinch &&
+        nextZoomOnDoubleClick === state.zoomOnDoubleClick &&
+        nextPanOnScroll === state.panOnScroll
+      ) {
+        return state;
+      }
+
+      return {
+        ...state,
+        zoomOnScroll: nextZoomOnScroll,
+        zoomOnPinch: nextZoomOnPinch,
+        zoomOnDoubleClick: nextZoomOnDoubleClick,
+        panOnScroll: nextPanOnScroll,
+      };
+    }
+    case "setInteractivity": {
+      if (typeof action.payload !== "boolean") return state;
+      if (action.payload === state.isInteractive) return state;
+      return { ...state, isInteractive: action.payload };
+    }
+    case "toggleInteractivity":
+      return { ...state, isInteractive: !state.isInteractive };
     case "reset":
       return {
         ...state,
         transform: [state.defaultViewport.x, state.defaultViewport.y, state.defaultViewport.zoom],
       };
-    case "incrementZoom": {
-      let newZoom = state.transform[2] * 1.2;
-      newZoom = clampZoom(newZoom, state.minZoom, state.maxZoom);
-      if (newZoom === state.transform[2]) {
-        return state;
-      }
-      return { ...state, transform: [state.transform[0], state.transform[1], newZoom] };
-    }
-    case "decrementZoom": {
-      let newZoom = state.transform[2] * 0.8;
-      newZoom = clampZoom(newZoom, state.minZoom, state.maxZoom);
-      if (newZoom === state.transform[2]) {
-        return state;
-      }
-      return { ...state, transform: [state.transform[0], state.transform[1], newZoom] };
-    }
     case "setPanZoom": {
-      if (action.payload instanceof PanZoom) {
-        return { ...state, panZoom: action.payload };
+      if (action.payload === null) {
+        if (state.panZoom === null) return state;
+        return { ...state, panZoom: null };
       }
-      return state;
+      if (!(action.payload instanceof PanZoom)) return state;
+      if (action.payload === state.panZoom) return state;
+      return { ...state, panZoom: action.payload };
     }
     default:
       return state;

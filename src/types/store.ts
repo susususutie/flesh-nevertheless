@@ -12,6 +12,11 @@ export type StoreData = {
   maxZoom: number;
   defaultViewport: Viewport;
   panZoom: PanZoom | null;
+  isInteractive: boolean;
+  zoomOnScroll: boolean;
+  zoomOnPinch: boolean;
+  zoomOnDoubleClick: boolean;
+  panOnScroll: boolean;
 };
 
 // reactive 实时状态，高频变化（帧级）
@@ -32,7 +37,13 @@ export type StoreAction =
   | { type: "setDefaultViewport"; payload: Viewport }
   | { type: "setMinZoom"; payload: number }
   | { type: "setMaxZoom"; payload: number }
-  | { type: "incrementZoom" }
-  | { type: "decrementZoom" }
+  | {
+      type: "setInteractionOptions";
+      payload: Partial<
+        Pick<StoreData, "zoomOnScroll" | "zoomOnPinch" | "zoomOnDoubleClick" | "panOnScroll">
+      >;
+    }
+  | { type: "setInteractivity"; payload: boolean }
+  | { type: "toggleInteractivity" }
   | { type: "reset" }
   | { type: "setPanZoom"; payload: PanZoom | null };
