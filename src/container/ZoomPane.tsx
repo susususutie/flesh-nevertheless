@@ -52,12 +52,12 @@ export default function ZoomPane(props: ZoomPaneProps) {
       });
       dispatch({ type: "setPanZoom", payload: panZoom.current });
       dispatch({
-        type: "setState",
+        type: "setStore",
         payload: { key: "domNode", value: rootRef.current.parentElement as HTMLDivElement },
       });
       return () => {
         panZoom.current?.destroy();
-        dispatch({ type: "setState", payload: { key: "domNode", value: null } });
+        dispatch({ type: "setStore", payload: { key: "domNode", value: null } });
         dispatch({ type: "setPanZoom", payload: null });
       };
     }

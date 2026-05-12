@@ -51,7 +51,10 @@ export default function StoreUpdater(props: StoreUpdaterProps) {
 
         if (fieldValue === previousFieldValue) continue;
         if (typeof fieldValue === "undefined") continue;
-        dispatch({ type: "setState", payload: { key: fieldName, value: fieldValue } });
+        dispatch({
+          type: "setStore",
+          payload: { key: fieldName, value: fieldValue },
+        });
       }
       previousFields.current = props;
     },

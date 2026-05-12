@@ -11,7 +11,7 @@ export default function ZoomController() {
       <button
         onClick={() =>
           dispatch({
-            type: "setState",
+            type: "setStore",
             payload: { key: "zoomOnScroll", value: !data.zoomOnScroll },
           })
         }
@@ -21,7 +21,7 @@ export default function ZoomController() {
       <button
         onClick={() =>
           dispatch({
-            type: "setState",
+            type: "setStore",
             payload: { key: "panOnScroll", value: !data.panOnScroll },
           })
         }
@@ -31,7 +31,7 @@ export default function ZoomController() {
       <button
         onClick={() =>
           dispatch({
-            type: "setState",
+            type: "setStore",
             payload: { key: "zoomOnDoubleClick", value: !data.zoomOnDoubleClick },
           })
         }
@@ -41,7 +41,7 @@ export default function ZoomController() {
       <button
         onClick={() =>
           dispatch({
-            type: "setState",
+            type: "setStore",
             payload: { key: "zoomOnPinch", value: !data.zoomOnPinch },
           })
         }

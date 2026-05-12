@@ -120,6 +120,11 @@ export default function storeReducer(state: StoreStateType, action: StoreAction)
       if (action.payload === state.panZoom) return state;
       return { ...state, panZoom: action.payload };
     }
+    case "setStore": {
+      const { key, value } = action.payload;
+      if (state[key] === value) return state;
+      return { ...state, [key]: value };
+    }
     default:
       return state;
   }

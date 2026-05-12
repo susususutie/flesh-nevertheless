@@ -15,7 +15,7 @@ function Root(props: RootPropsType) {
     style,
     children,
     minZoom = 0.5,
-    maxZoom = 10,
+    maxZoom = 2,
     defaultViewport = initViewport,
     viewport,
     onViewportChange,

@@ -43,6 +43,6 @@ export type StoreAction =
   | { type: "reset" }
   | { type: "setPanZoom"; payload: PanZoom | null }
   | {
-      type: "setState";
+      type: "setStore";
       payload: { key: keyof StoreStateType; value: StoreStateType[keyof StoreStateType] };
     };

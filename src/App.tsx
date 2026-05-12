@@ -21,8 +21,8 @@ export default function App() {
           <DisplayZoom />
           <ZoomController />
         </Toolbar>
-        <Background id="1" />
-        {/* <Background id="2" gap={[35, 35]} color="red" /> */}
+        <Background id="1" variant="lines" gap={10} color="#f4f4f480" />
+        <Background id="3" variant="lines" gap={100} />
         <Controls />
       </Root>
 
