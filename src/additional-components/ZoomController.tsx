@@ -10,14 +10,20 @@ export default function ZoomController() {
       <button onClick={() => dispatch({ type: "reset" })}>Reset</button>
       <button
         onClick={() =>
-          dispatch({ type: "setInteractionOptions", payload: { zoomOnScroll: !data.zoomOnScroll } })
+          dispatch({
+            type: "setState",
+            payload: { key: "zoomOnScroll", value: !data.zoomOnScroll },
+          })
         }
       >
         Wheel Zoom: {data.zoomOnScroll ? "On" : "Off"}
       </button>
       <button
         onClick={() =>
-          dispatch({ type: "setInteractionOptions", payload: { panOnScroll: !data.panOnScroll } })
+          dispatch({
+            type: "setState",
+            payload: { key: "panOnScroll", value: !data.panOnScroll },
+          })
         }
       >
         Wheel Pan: {data.panOnScroll ? "On" : "Off"}
@@ -25,8 +31,8 @@ export default function ZoomController() {
       <button
         onClick={() =>
           dispatch({
-            type: "setInteractionOptions",
-            payload: { zoomOnDoubleClick: !data.zoomOnDoubleClick },
+            type: "setState",
+            payload: { key: "zoomOnDoubleClick", value: !data.zoomOnDoubleClick },
           })
         }
       >
@@ -34,7 +40,10 @@ export default function ZoomController() {
       </button>
       <button
         onClick={() =>
-          dispatch({ type: "setInteractionOptions", payload: { zoomOnPinch: !data.zoomOnPinch } })
+          dispatch({
+            type: "setState",
+            payload: { key: "zoomOnPinch", value: !data.zoomOnPinch },
+          })
         }
       >
         Pinch: {data.zoomOnPinch ? "On" : "Off"}

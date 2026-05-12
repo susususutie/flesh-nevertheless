@@ -3,7 +3,8 @@ import { type Transform, type Viewport } from ".";
 
 // 静态配置, 来自 props，初始化后不变（从 props 中获取初始化后恒定不变 ）
 export type StoreConfig = {
-  id: string;
+  rfId: string;
+  domNode: HTMLDivElement | null;
 };
 
 // data 业务状态，中低频变化（秒级/分钟级）
@@ -37,13 +38,11 @@ export type StoreAction =
   | { type: "setDefaultViewport"; payload: Viewport }
   | { type: "setMinZoom"; payload: number }
   | { type: "setMaxZoom"; payload: number }
-  | {
-      type: "setInteractionOptions";
-      payload: Partial<
-        Pick<StoreData, "zoomOnScroll" | "zoomOnPinch" | "zoomOnDoubleClick" | "panOnScroll">
-      >;
-    }
   | { type: "setInteractivity"; payload: boolean }
   | { type: "toggleInteractivity" }
   | { type: "reset" }
-  | { type: "setPanZoom"; payload: PanZoom | null };
+  | { type: "setPanZoom"; payload: PanZoom | null }
+  | {
+      type: "setState";
+      payload: { key: keyof StoreStateType; value: StoreStateType[keyof StoreStateType] };
+    };

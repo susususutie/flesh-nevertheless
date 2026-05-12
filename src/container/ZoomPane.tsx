@@ -10,8 +10,11 @@ type ZoomPaneProps = {
 } & Pick<RootPropsType, "onViewportChange">;
 
 /**
- * TODO 实现有问题
- 
+ * @description 视口变换层
+ * 使用 `PanZoom` 实例来控制画布所有 **pan/zoom** 操作
+ * - 滚轮缩放、双指缩放、双击缩放、拖拽平移、滚动平移
+ * - 负责 `transform` 状态的管理和 `onViewportChange` 回调
+ * - 将 `panZoom` 实例写入 store，供其他组件（如 MiniMap、Controls）使用
  */
 export default function ZoomPane(props: ZoomPaneProps) {
   const { children, isControlledViewport, onViewportChange } = props;
@@ -48,8 +51,13 @@ export default function ZoomPane(props: ZoomPaneProps) {
         onTransformChange,
       });
       dispatch({ type: "setPanZoom", payload: panZoom.current });
+      dispatch({
+        type: "setState",
+        payload: { key: "domNode", value: rootRef.current.parentElement as HTMLDivElement },
+      });
       return () => {
         panZoom.current?.destroy();
+        dispatch({ type: "setState", payload: { key: "domNode", value: null } });
         dispatch({ type: "setPanZoom", payload: null });
       };
     }

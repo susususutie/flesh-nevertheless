@@ -11,8 +11,8 @@ type BackgroundProps = {
 };
 
 export default function Background(props: BackgroundProps) {
-  const { id: _backgroundId, gap = 20, size = 2, color = "#cdcdcd", bgColor } = props;
-  const { id } = useConfig();
+  const { id, gap = 20, size = 2, color = "#cdcdcd", bgColor } = props;
+  const { rfId } = useConfig();
   const reactive = useReactive();
   const [x, y, zoom] = reactive.transform;
 
@@ -20,7 +20,7 @@ export default function Background(props: BackgroundProps) {
   const gapXY: [number, number] = Array.isArray(gap) ? gap : [gap, gap];
   const scaledGap: [number, number] = [gapXY[0] * scale || 1, gapXY[1] * scale || 1];
   const scaledSize = size * scale;
-  const patternId = `pattern-${id}-${_backgroundId ?? ""}`;
+  const patternId = `pattern-${id ?? rfId}`;
 
   return (
     <svg

@@ -7,15 +7,15 @@ import ZoomPane from "./container/ZoomPane";
 import { type RootPropsType, type Viewport } from "./types";
 import { memo, useId, type CSSProperties } from "react";
 
-const initViewport: Viewport = { x: 0, y: 0, zoom: 1 };
+const initViewport: Viewport = { x: 0, y: 0, zoom: 10 };
 
 function Root(props: RootPropsType) {
   const {
-    id: _id,
+    id,
     style,
     children,
-    minZoom,
-    maxZoom,
+    minZoom = 0.5,
+    maxZoom = 10,
     defaultViewport = initViewport,
     viewport,
     onViewportChange,
@@ -25,17 +25,16 @@ function Root(props: RootPropsType) {
     panOnScroll,
   } = props;
 
-  const id = _id ?? `Root-${useId()}`;
-  // console.log("Root render", id);
+  const rfId = id ?? `Root-${useId()}`;
 
   return (
     <div
-      id={id}
+      id={rfId}
       style={{ position: "relative", width: "100%", height: "100%", overflow: "hidden", ...style }}
     >
       {/* 根据 props 初始化全局状态  */}
       <StoreProvider
-        id={id}
+        rfId={rfId}
         minZoom={minZoom}
         maxZoom={maxZoom}
         defaultViewport={defaultViewport}
@@ -47,6 +46,7 @@ function Root(props: RootPropsType) {
       >
         {/* 后续 props 变更，同步到全局状态 */}
         <StoreUpdater
+          rfId={rfId}
           minZoom={minZoom}
           maxZoom={maxZoom}
           defaultViewport={defaultViewport}

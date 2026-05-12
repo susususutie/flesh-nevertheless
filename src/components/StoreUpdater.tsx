@@ -1,8 +1,9 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import useDispatch from "../hooks/useDispatch";
 import { type RootPropsType } from "../types";
+import initialState from "../store/initialState";
 
-type StoreUpdaterProps = {} & Pick<
+type StoreUpdaterProps = { rfId: string } & Pick<
   RootPropsType,
   | "minZoom"
   | "maxZoom"
@@ -14,58 +15,48 @@ type StoreUpdaterProps = {} & Pick<
   | "panOnScroll"
 >;
 
+const fieldsToTrack = [
+  "rfId",
+  "minZoom",
+  "maxZoom",
+  "defaultViewport",
+  "zoomOnScroll",
+  "zoomOnPinch",
+  "zoomOnDoubleClick",
+  "panOnScroll",
+] as const;
+const fieldsInitialValues = {
+  rfId: initialState.rfId,
+  minZoom: initialState.minZoom,
+  maxZoom: initialState.maxZoom,
+  defaultViewport: initialState.defaultViewport,
+  zoomOnScroll: initialState.zoomOnScroll,
+  zoomOnPinch: initialState.zoomOnPinch,
+  zoomOnDoubleClick: initialState.zoomOnDoubleClick,
+  panOnScroll: initialState.panOnScroll,
+};
+
 /**
- * 监听 props 变化，更新 store 中的数据
+ * 监听 props 指定字段(fieldsToTrack)的变化，更新 store 中的对应数据
  */
 export default function StoreUpdater(props: StoreUpdaterProps) {
-  const {
-    minZoom,
-    maxZoom,
-    defaultViewport,
-    viewport,
-    zoomOnScroll,
-    zoomOnPinch,
-    zoomOnDoubleClick,
-    panOnScroll,
-  } = props;
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    if (minZoom !== undefined) {
-      dispatch({ type: "setMinZoom", payload: minZoom });
-    }
-  }, [dispatch, minZoom]);
-  useEffect(() => {
-    if (maxZoom !== undefined) {
-      dispatch({ type: "setMaxZoom", payload: maxZoom });
-    }
-  }, [dispatch, maxZoom]);
-  useEffect(() => {
-    if (defaultViewport) {
-      // TODO 数据格式化
-      dispatch({ type: "setDefaultViewport", payload: defaultViewport });
-    }
-  }, [dispatch, defaultViewport?.x, defaultViewport?.y, defaultViewport?.zoom]);
-  useEffect(() => {
-    if (viewport) {
-      dispatch({ type: "syncViewport", payload: viewport });
-    }
-  }, [dispatch, viewport?.x, viewport?.y, viewport?.zoom]);
+  const previousFields = useRef<Partial<StoreUpdaterProps>>(fieldsInitialValues);
+  useEffect(
+    () => {
+      for (const fieldName of fieldsToTrack) {
+        const fieldValue = props[fieldName];
+        const previousFieldValue = previousFields.current[fieldName];
 
-  useEffect(() => {
-    const payload: Partial<{
-      zoomOnScroll: boolean;
-      zoomOnPinch: boolean;
-      zoomOnDoubleClick: boolean;
-      panOnScroll: boolean;
-    }> = {};
-    if (zoomOnScroll !== undefined) payload.zoomOnScroll = zoomOnScroll;
-    if (zoomOnPinch !== undefined) payload.zoomOnPinch = zoomOnPinch;
-    if (zoomOnDoubleClick !== undefined) payload.zoomOnDoubleClick = zoomOnDoubleClick;
-    if (panOnScroll !== undefined) payload.panOnScroll = panOnScroll;
-    if (Object.keys(payload).length === 0) return;
-    dispatch({ type: "setInteractionOptions", payload });
-  }, [dispatch, zoomOnScroll, zoomOnPinch, zoomOnDoubleClick, panOnScroll]);
+        if (fieldValue === previousFieldValue) continue;
+        if (typeof fieldValue === "undefined") continue;
+        dispatch({ type: "setState", payload: { key: fieldName, value: fieldValue } });
+      }
+      previousFields.current = props;
+    },
+    fieldsToTrack.map((fieldName) => props[fieldName]),
+  );
 
   return null;
 }

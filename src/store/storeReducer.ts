@@ -99,37 +99,6 @@ export default function storeReducer(state: StoreStateType, action: StoreAction)
         defaultViewport: { ...state.defaultViewport, zoom: nextDefaultZoom },
       };
     }
-    case "setInteractionOptions": {
-      const nextZoomOnScroll =
-        action.payload.zoomOnScroll !== undefined
-          ? action.payload.zoomOnScroll
-          : state.zoomOnScroll;
-      const nextZoomOnPinch =
-        action.payload.zoomOnPinch !== undefined ? action.payload.zoomOnPinch : state.zoomOnPinch;
-      const nextZoomOnDoubleClick =
-        action.payload.zoomOnDoubleClick !== undefined
-          ? action.payload.zoomOnDoubleClick
-          : state.zoomOnDoubleClick;
-      const nextPanOnScroll =
-        action.payload.panOnScroll !== undefined ? action.payload.panOnScroll : state.panOnScroll;
-
-      if (
-        nextZoomOnScroll === state.zoomOnScroll &&
-        nextZoomOnPinch === state.zoomOnPinch &&
-        nextZoomOnDoubleClick === state.zoomOnDoubleClick &&
-        nextPanOnScroll === state.panOnScroll
-      ) {
-        return state;
-      }
-
-      return {
-        ...state,
-        zoomOnScroll: nextZoomOnScroll,
-        zoomOnPinch: nextZoomOnPinch,
-        zoomOnDoubleClick: nextZoomOnDoubleClick,
-        panOnScroll: nextPanOnScroll,
-      };
-    }
     case "setInteractivity": {
       if (typeof action.payload !== "boolean") return state;
       if (action.payload === state.isInteractive) return state;

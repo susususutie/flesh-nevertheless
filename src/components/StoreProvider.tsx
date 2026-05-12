@@ -8,7 +8,7 @@ import storeReducer from "../store/storeReducer";
 import { type RootPropsType, type StoreAction, type StoreStateType } from "../types";
 
 type StoreProviderProps = {
-  id: string;
+  rfId: string;
   children: ReactNode;
 } & Pick<
   RootPropsType,
@@ -39,7 +39,7 @@ function initState(props: StoreProviderProps): StoreStateType {
 
   const state = {
     ...initialState,
-    id: props.id,
+    rfId: props.rfId,
     minZoom,
     maxZoom,
     defaultViewport: {
@@ -69,7 +69,10 @@ export default function StoreProvider(props: StoreProviderProps) {
   );
 
   // useMemo 稳定各层的引用
-  const configValue = useMemo(() => ({ id: state.id }), [state.id]);
+  const configValue = useMemo(
+    () => ({ rfId: state.rfId, domNode: state.domNode }),
+    [state.rfId, state.domNode],
+  );
   const dataValue = useMemo(
     () => ({
       minZoom: state.minZoom,
