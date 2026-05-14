@@ -91,7 +91,7 @@ function Root(props: RootPropsType) {
           <Pane>
             <FlowViewport>
               <EdgeRenderer />
-              <NodeRenderer />
+              <NodeRenderer rfId={rfId} />
             </FlowViewport>
           </Pane>
         </ZoomPane>

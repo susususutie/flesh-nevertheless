@@ -7,6 +7,7 @@ import { builtinNodeTypes } from "./utils.ts";
 import { type EdgeChange, type NodeChange, type InternalNode, type Node } from "../../types";
 
 type NodeWrapperProps = {
+  rfId: string;
   id: string;
   noDragClassName?: string;
   nodesConnectable: boolean;
@@ -16,6 +17,7 @@ type NodeWrapperProps = {
 
 export default function NodeWrapper(props: NodeWrapperProps) {
   const {
+    rfId,
     id,
     noDragClassName = "nodrag",
     nodesConnectable,
@@ -45,7 +47,6 @@ export default function NodeWrapper(props: NodeWrapperProps) {
     builtinNodeTypes.default;
 
   // 监听节点大小变化，更新测量数据
-  // TODO: 优化性能，将 ResizeObserver 提取到上层组件，所有节点共享一个 ResizeObserver，并将更新操作批量切片处理
   useEffect(() => {
     const el = nodeRef.current;
     if (!el || node.hidden) return;
@@ -214,6 +215,7 @@ export default function NodeWrapper(props: NodeWrapperProps) {
     >
       <NodeIdContext.Provider value={id}>
         <NodeComponent
+          rfId={rfId}
           id={node.id}
           type={nodeType}
           data={node.data}

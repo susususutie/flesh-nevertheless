@@ -94,6 +94,7 @@ export type NodeProps<NodeType extends Node = Node> = Pick<
       | "zIndex"
     >
   > & {
+    rfId: string;
     /** Whether a node is connectable or not. */
     positionAbsoluteX: number;
     positionAbsoluteY: number;
