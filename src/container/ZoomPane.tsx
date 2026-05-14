@@ -43,7 +43,6 @@ export default function ZoomPane(props: ZoomPaneProps) {
         minZoom: data.minZoom,
         maxZoom: data.maxZoom,
         viewport: data.defaultViewport,
-        isInteractive: data.isInteractive,
         zoomOnScroll: data.zoomOnScroll,
         zoomOnPinch: data.zoomOnPinch,
         zoomOnDoubleClick: data.zoomOnDoubleClick,
@@ -65,19 +64,12 @@ export default function ZoomPane(props: ZoomPaneProps) {
 
   useEffect(() => {
     panZoom.current?.setOptions({
-      isInteractive: data.isInteractive,
       zoomOnScroll: data.zoomOnScroll,
       zoomOnPinch: data.zoomOnPinch,
       zoomOnDoubleClick: data.zoomOnDoubleClick,
       panOnScroll: data.panOnScroll,
     });
-  }, [
-    data.isInteractive,
-    data.zoomOnScroll,
-    data.zoomOnPinch,
-    data.zoomOnDoubleClick,
-    data.panOnScroll,
-  ]);
+  }, [data.zoomOnScroll, data.zoomOnPinch, data.zoomOnDoubleClick, data.panOnScroll]);
 
   return (
     <div

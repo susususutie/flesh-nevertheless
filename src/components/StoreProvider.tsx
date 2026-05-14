@@ -17,6 +17,9 @@ type StoreProviderProps = {
   | "defaultNodes"
   | "nodes"
   | "onNodesChange"
+  | "nodesConnectable"
+  | "nodesDraggable"
+  | "nodesSelectable"
   | "defaultEdges"
   | "edges"
   | "onEdgesChange"
@@ -56,6 +59,9 @@ function initState(props: StoreProviderProps): StoreStateType {
     ? resolvedInitialViewport.zoom
     : Math.max(Math.min(resolvedInitialViewport.zoom, maxZoom), minZoom);
   const clampedDefaultZoom = Math.max(Math.min(resolvedDefaultViewport.zoom, maxZoom), minZoom);
+  const nodesConnectable = props.nodesConnectable ?? initialState.nodesConnectable;
+  const nodesDraggable = props.nodesDraggable ?? initialState.nodesDraggable;
+  const nodesSelectable = props.nodesSelectable ?? initialState.nodesSelectable;
 
   const state = {
     ...initialState,
@@ -65,6 +71,9 @@ function initState(props: StoreProviderProps): StoreStateType {
     // 传入的原始数据，有很多空值
     nodes,
     edges,
+    nodesConnectable,
+    nodesDraggable,
+    nodesSelectable,
     // 处理后的节点配置
     nodeLookup: new Map(
       nodes.map((node) => [
@@ -114,6 +123,9 @@ export default function StoreProvider(props: StoreProviderProps) {
       maxZoom: state.maxZoom,
       nodes: state.nodes,
       edges: state.edges,
+      nodesConnectable: state.nodesConnectable,
+      nodesDraggable: state.nodesDraggable,
+      nodesSelectable: state.nodesSelectable,
       nodeLookup: state.nodeLookup,
       edgeLookup: state.edgeLookup,
       nodeTypes: state.nodeTypes,
@@ -122,7 +134,6 @@ export default function StoreProvider(props: StoreProviderProps) {
       onEdgesChange: state.onEdgesChange,
       defaultViewport: state.defaultViewport,
       panZoom: state.panZoom,
-      isInteractive: state.isInteractive,
       zoomOnScroll: state.zoomOnScroll,
       zoomOnPinch: state.zoomOnPinch,
       zoomOnDoubleClick: state.zoomOnDoubleClick,
@@ -133,6 +144,9 @@ export default function StoreProvider(props: StoreProviderProps) {
       state.maxZoom,
       state.nodes,
       state.edges,
+      state.nodesConnectable,
+      state.nodesDraggable,
+      state.nodesSelectable,
       state.nodeLookup,
       state.edgeLookup,
       state.nodeTypes,
@@ -143,7 +157,6 @@ export default function StoreProvider(props: StoreProviderProps) {
       state.defaultViewport.y,
       state.defaultViewport.zoom,
       state.panZoom,
-      state.isInteractive,
       state.zoomOnScroll,
       state.zoomOnPinch,
       state.zoomOnDoubleClick,

@@ -35,7 +35,9 @@ export type StoreData<NodeType extends Node = Node, EdgeType extends Edge = Edge
 
   defaultViewport: Viewport;
   panZoom: PanZoom | null;
-  isInteractive: boolean;
+  nodesConnectable: boolean;
+  nodesDraggable: boolean;
+  nodesSelectable: boolean;
   zoomOnScroll: boolean;
   zoomOnPinch: boolean;
   zoomOnDoubleClick: boolean;

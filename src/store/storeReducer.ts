@@ -249,11 +249,22 @@ export default function storeReducer(state: StoreStateType, action: StoreAction)
     }
     case "setInteractivity": {
       if (typeof action.payload !== "boolean") return state;
-      if (action.payload === state.isInteractive) return state;
-      return { ...state, isInteractive: action.payload };
+      const isInteractive = action.payload;
+      return {
+        ...state,
+        nodesSelectable: isInteractive,
+        nodesDraggable: isInteractive,
+        nodesConnectable: isInteractive,
+      };
     }
     case "toggleInteractivity":
-      return { ...state, isInteractive: !state.isInteractive };
+      const isInteractive = state.nodesDraggable || state.nodesConnectable || state.nodesSelectable;
+      return {
+        ...state,
+        nodesSelectable: !isInteractive,
+        nodesDraggable: !isInteractive,
+        nodesConnectable: !isInteractive,
+      };
     case "reset":
       return {
         ...state,

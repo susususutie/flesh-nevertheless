@@ -39,7 +39,7 @@ export default function Controls(props: ControlsProps) {
     }
   };
 
-  const isInteractive = data.isInteractive;
+  const isInteractive = data.nodesSelectable || data.nodesDraggable || data.nodesConnectable;
   const handleToggleInteractivity = () => {
     dispatch({ type: "toggleInteractivity" });
   };

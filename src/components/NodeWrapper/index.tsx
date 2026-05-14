@@ -4,15 +4,24 @@ import useDispatch from "../../hooks/useDispatch";
 import useReactive from "../../hooks/useReactive";
 import NodeIdContext from "../../contexts/NodeIdContext";
 import { builtinNodeTypes } from "./utils.ts";
-import { type EdgeChange, type InternalNode, type NodeChange } from "../../types";
+import { type EdgeChange, type NodeChange, type InternalNode, type Node } from "../../types";
 
 type NodeWrapperProps = {
   id: string;
   noDragClassName?: string;
+  nodesConnectable: boolean;
+  nodesDraggable: boolean;
+  nodesSelectable: boolean;
 };
 
 export default function NodeWrapper(props: NodeWrapperProps) {
-  const { id, noDragClassName = "nodrag" } = props;
+  const {
+    id,
+    noDragClassName = "nodrag",
+    nodesConnectable,
+    nodesDraggable,
+    nodesSelectable,
+  } = props;
   const data = useData();
   const dispatch = useDispatch();
   const reactive = useReactive();
@@ -25,8 +34,7 @@ export default function NodeWrapper(props: NodeWrapperProps) {
     moved: boolean;
   } | null>(null);
 
-  const node = data.nodeLookup.get(id) as InternalNode | undefined;
-  if (!node || node.hidden) return null;
+  const node = data.nodeLookup.get(id) as InternalNode<Node>;
 
   const nodeInternals = node.internals;
   const nodeType = node.type || "default";
@@ -52,6 +60,22 @@ export default function NodeWrapper(props: NodeWrapperProps) {
 
     return () => ro.disconnect();
   }, [dispatch, id, node.hidden]);
+
+  if (node.hidden) return null;
+
+  const isSelectable = !!(
+    node.selectable ||
+    (nodesSelectable && typeof node.selectable === "undefined")
+  );
+  const isDeletable = true; //!!(node.deletable || (nodesDeletable && typeof node.deletable === "undefined"));
+  const isDraggable = !!(
+    node.draggable ||
+    (nodesDraggable && typeof node.draggable === "undefined")
+  );
+  const isConnectable = !!(
+    node.connectable ||
+    (nodesConnectable && typeof node.connectable === "undefined")
+  );
 
   const applyChanges = (nodeChanges: NodeChange[], edgeChanges: EdgeChange[]) => {
     if (nodeChanges.length > 0) data.onNodesChange?.(nodeChanges);
@@ -200,10 +224,10 @@ export default function NodeWrapper(props: NodeWrapperProps) {
           positionAbsoluteX={node.position.x}
           positionAbsoluteY={node.position.y}
           zIndex={nodeInternals.zIndex}
-          selectable={!!node.selectable}
-          deletable={!!node.deletable}
-          draggable={!!node.draggable}
-          connectable={!!node.connectable}
+          connectable={isConnectable}
+          deletable={isDeletable}
+          draggable={isDraggable}
+          selectable={isSelectable}
         />
       </NodeIdContext.Provider>
     </div>

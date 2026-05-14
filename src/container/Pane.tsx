@@ -122,12 +122,6 @@ export default function Pane({ children }: { children: ReactNode }) {
       onPointerDown={(event) => {
         if (event.button !== 0) return;
 
-        const domNode = config.domNode;
-        if (domNode && domNode.tabIndex < 0) {
-          domNode.tabIndex = 0;
-        }
-        domNode?.focus?.();
-
         const rect = paneRef.current?.getBoundingClientRect();
         if (!rect) return;
 

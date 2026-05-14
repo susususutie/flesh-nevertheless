@@ -29,6 +29,21 @@ export type RootPropsType<
    */
   nodes?: NodeType[];
   onNodesChange?: (changes: NodeChange[]) => void;
+  /**
+   * 是否允许节点连接。可被节点自身的 connectable 属性覆盖。
+   * 默认值：true。
+   */
+  nodesConnectable?: boolean;
+  /**
+   * 是否允许节点拖动。可被节点自身的 draggable 属性覆盖。
+   * 默认值：true。
+   */
+  nodesDraggable?: boolean;
+  /**
+   * 是否允许节点选择。可被节点自身的 selectable 属性覆盖。
+   * 默认值：true。
+   */
+  nodesSelectable?: boolean;
 
   /**
    * 非受控模式，默认边，不会自动更新

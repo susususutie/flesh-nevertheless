@@ -2,7 +2,7 @@ import useData from "../hooks/useData";
 import NodeWrapper from "../components/NodeWrapper";
 
 export default function NodeRenderer() {
-  const { nodes } = useData();
+  const { nodes, nodesConnectable, nodesDraggable, nodesSelectable } = useData();
 
   return (
     <div
@@ -10,7 +10,13 @@ export default function NodeRenderer() {
       style={{ position: "absolute", width: "100%", height: "100%", top: 0, left: 0 }}
     >
       {nodes.map((node) => (
-        <NodeWrapper key={node.id} id={node.id} />
+        <NodeWrapper
+          key={node.id}
+          id={node.id}
+          nodesDraggable={nodesDraggable}
+          nodesSelectable={nodesSelectable}
+          nodesConnectable={nodesConnectable}
+        />
       ))}
     </div>
   );
