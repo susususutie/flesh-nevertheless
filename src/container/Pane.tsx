@@ -191,8 +191,8 @@ export default function Pane({ children }: { children: ReactNode }) {
             const lookup = data.nodeLookup.get(node.id);
             if (!lookup) continue;
 
-            const nodeWidth = lookup.measured?.width ?? 0;
-            const nodeHeight = lookup.measured?.height ?? 0;
+            const nodeWidth = lookup.internals.measured?.width ?? 0;
+            const nodeHeight = lookup.internals.measured?.height ?? 0;
 
             const nLeft = tX + node.position.x * zoom;
             const nTop = tY + node.position.y * zoom;

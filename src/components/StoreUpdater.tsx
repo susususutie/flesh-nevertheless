@@ -11,6 +11,8 @@ type StoreUpdaterProps = { rfId: string } & Pick<
   | "onNodesChange"
   | "edges"
   | "onEdgesChange"
+  | "nodeTypes"
+  | "edgeTypes"
   | "defaultViewport"
   | "viewport"
   | "zoomOnScroll"
@@ -27,6 +29,8 @@ const fieldsToTrack = [
   "onNodesChange",
   "edges",
   "onEdgesChange",
+  "nodeTypes",
+  "edgeTypes",
   "defaultViewport",
   "zoomOnScroll",
   "zoomOnPinch",
@@ -41,6 +45,8 @@ const fieldsInitialValues = {
   onNodesChange: initialState.onNodesChange,
   edges: initialState.edges,
   onEdgesChange: initialState.onEdgesChange,
+  nodeTypes: initialState.nodeTypes,
+  edgeTypes: initialState.edgeTypes,
   defaultViewport: initialState.defaultViewport,
   zoomOnScroll: initialState.zoomOnScroll,
   zoomOnPinch: initialState.zoomOnPinch,

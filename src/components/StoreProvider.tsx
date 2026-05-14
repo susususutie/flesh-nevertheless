@@ -22,6 +22,8 @@ type StoreProviderProps = {
   | "onEdgesChange"
   | "defaultViewport"
   | "viewport"
+  | "nodeTypes"
+  | "edgeTypes"
   | "zoomOnScroll"
   | "zoomOnPinch"
   | "zoomOnDoubleClick"
@@ -60,12 +62,21 @@ function initState(props: StoreProviderProps): StoreStateType {
     rfId: props.rfId,
     minZoom,
     maxZoom,
+    // 传入的原始数据，有很多空值
     nodes,
     edges,
-    nodeLookup: new Map(nodes.map((node) => [node.id, { ...node, measured: {} }])),
+    // 处理后的节点配置
+    nodeLookup: new Map(
+      nodes.map((node) => [
+        node.id,
+        { ...node, internals: { measured: {}, zIndex: node.zIndex ?? 0 } },
+      ]),
+    ),
     edgeLookup: new Map(edges.map((edge) => [edge.id!, edge])),
-    onNodesChange: props.onNodesChange,
-    onEdgesChange: props.onEdgesChange,
+    nodeTypes: (props.nodeTypes ?? initialState.nodeTypes) as StoreStateType["nodeTypes"],
+    edgeTypes: (props.edgeTypes ?? initialState.edgeTypes) as StoreStateType["edgeTypes"],
+    onNodesChange: props.onNodesChange ?? null,
+    onEdgesChange: props.onEdgesChange ?? null,
     defaultViewport: {
       x: resolvedDefaultViewport.x,
       y: resolvedDefaultViewport.y,
@@ -105,6 +116,10 @@ export default function StoreProvider(props: StoreProviderProps) {
       edges: state.edges,
       nodeLookup: state.nodeLookup,
       edgeLookup: state.edgeLookup,
+      nodeTypes: state.nodeTypes,
+      edgeTypes: state.edgeTypes,
+      onNodesChange: state.onNodesChange,
+      onEdgesChange: state.onEdgesChange,
       defaultViewport: state.defaultViewport,
       panZoom: state.panZoom,
       isInteractive: state.isInteractive,
@@ -120,6 +135,10 @@ export default function StoreProvider(props: StoreProviderProps) {
       state.edges,
       state.nodeLookup,
       state.edgeLookup,
+      state.nodeTypes,
+      state.edgeTypes,
+      state.onNodesChange,
+      state.onEdgesChange,
       state.defaultViewport.x,
       state.defaultViewport.y,
       state.defaultViewport.zoom,

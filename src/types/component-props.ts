@@ -1,5 +1,13 @@
 import { type HTMLAttributes } from "react";
-import { type Edge, type EdgeChange, type Node, type NodeChange, type Viewport } from ".";
+import {
+  type Edge,
+  type EdgeChange,
+  type EdgeTypes,
+  type Node,
+  type NodeChange,
+  type NodeTypes,
+  type Viewport,
+} from ".";
 
 /**
  * 如果使用自定义节点:
@@ -31,6 +39,19 @@ export type RootPropsType<
    */
   edges?: EdgeType[];
   onEdgesChange?: (changes: EdgeChange[]) => void;
+
+  /**
+   * 自定义节点类型映射表。
+   * key 对应 node.type，value 为用户自定义组件。
+   * 必须用 useMemo 或在组件外定义，以避免每次渲染重建导致 bug。
+   */
+  nodeTypes?: NodeTypes<NodeType>;
+  /**
+   * 自定义边类型映射表。
+   * key 对应 edge.type，value 为用户自定义组件。
+   * 必须用 useMemo 或在组件外定义。
+   */
+  edgeTypes?: EdgeTypes<EdgeType>;
 
   defaultViewport?: Viewport;
   /**

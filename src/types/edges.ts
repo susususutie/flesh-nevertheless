@@ -1,4 +1,13 @@
-import type { CSSProperties } from "react";
+import type { CSSProperties, ComponentType } from "react";
+
+export type EdgePosition = {
+  sourceX: number;
+  sourceY: number;
+  targetX: number;
+  targetY: number;
+  // sourcePosition: Position;
+  // targetPosition: Position;
+};
 
 export type EdgeBase<
   EdgeData extends Record<string, unknown> = Record<string, unknown>,
@@ -25,8 +34,7 @@ export type EdgeBase<
   zIndex?: number;
 
   selected?: boolean;
-  // 展示固定为 8px
-  // interactionWidth?: number;
+  interactionWidth?: number;
 };
 
 export type Edge<
@@ -37,4 +45,33 @@ export type Edge<
   className?: string;
 };
 
+/** 边类型映射表 */
+export type EdgeTypes<EdgeType extends Edge = Edge> = Record<
+  string,
+  ComponentType<EdgeProps<EdgeType>>
+>;
+
 export type EdgeLookup<EdgeType extends EdgeBase = EdgeBase> = Map<string, EdgeType>;
+
+/**
+ * 注入给自定义边的 props
+ * @public
+ */
+export type EdgeProps<EdgeType extends Edge = Edge> = Pick<
+  EdgeType,
+  | "id"
+  | "type"
+  | "animated"
+  | "data"
+  | "style"
+  | "selected"
+  | "source"
+  | "target"
+  | "selectable"
+  | "deletable"
+> &
+  EdgePosition &
+  // EdgeLabelOptions &
+  {
+    interactionWidth?: number;
+  };

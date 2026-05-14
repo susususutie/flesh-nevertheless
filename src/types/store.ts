@@ -2,8 +2,10 @@ import PanZoom from "../helper/PanZoom";
 import {
   type Edge,
   type EdgeChange,
+  type EdgeTypes,
   type Node,
   type NodeChange,
+  type NodeTypes,
   type Transform,
   type Viewport,
   type InternalNode,
@@ -19,15 +21,17 @@ export type StoreConfig = {
 
 // data 业务状态，中低频变化（秒级/分钟级）
 export type StoreData<NodeType extends Node = Node, EdgeType extends Edge = Edge> = {
-  minZoom: number; // 缩放比例（scale）
+  minZoom: number;
   maxZoom: number;
 
   nodes: NodeType[];
   edges: EdgeType[];
   nodeLookup: NodeLookup<InternalNode<NodeType>>;
   edgeLookup: EdgeLookup<EdgeType>;
-  onNodesChange?: ((changes: NodeChange<NodeType>[]) => void) | null;
-  onEdgesChange?: ((changes: EdgeChange<EdgeType>[]) => void) | null;
+  nodeTypes: NodeTypes<NodeType>;
+  edgeTypes: EdgeTypes<EdgeType>;
+  onNodesChange: ((changes: NodeChange<NodeType>[]) => void) | null;
+  onEdgesChange: ((changes: EdgeChange<EdgeType>[]) => void) | null;
 
   defaultViewport: Viewport;
   panZoom: PanZoom | null;
@@ -57,7 +61,8 @@ export type StoreAction =
   | { type: "transform"; payload: StoreReactive["transform"] }
   | { type: "syncViewport"; payload: Viewport }
   | { type: "setDefaultViewport"; payload: Viewport }
-  | { type: "setNodeLayout"; payload: { id: string; width: number; height: number } }
+  // 更新节点测量尺寸
+  | { type: "updateInternalNodeMeasured"; payload: { id: string; width: number; height: number } }
   | { type: "applyNodeChanges"; payload: NodeChange[] }
   | { type: "applyEdgeChanges"; payload: EdgeChange[] }
   | { type: "setMinZoom"; payload: number }

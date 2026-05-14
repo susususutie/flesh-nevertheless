@@ -163,15 +163,15 @@ export default function storeReducer(state: StoreStateType, action: StoreAction)
       }
       return { ...state, defaultViewport: { x, y, zoom: nextZoom } };
     }
-    case "setNodeLayout": {
+    case "updateInternalNodeMeasured": {
       const { id, width, height } = action.payload;
       if (typeof id !== "string" || id.length === 0) return state;
       if (!isFiniteNumber(width) || !isFiniteNumber(height)) return state;
-      if (width <= 0 || height <= 0) return state;
+      if (width < 0 || height < 0) return state;
 
       const node = state.nodeLookup.get(id);
       if (!node) return state;
-      const prevMeasured = node.measured;
+      const prevMeasured = node.internals.measured;
       if (prevMeasured && prevMeasured.width === width && prevMeasured.height === height) {
         return state;
       }
@@ -179,7 +179,7 @@ export default function storeReducer(state: StoreStateType, action: StoreAction)
       const nextNodeLookup = new Map(state.nodeLookup);
       nextNodeLookup.set(id, {
         ...node,
-        measured: { width, height },
+        internals: { ...node.internals, measured: { width, height } },
       });
       return { ...state, nodeLookup: nextNodeLookup };
     }
@@ -189,7 +189,13 @@ export default function storeReducer(state: StoreStateType, action: StoreAction)
       const nextNodeLookup = new Map(
         nextNodes.map((node) => {
           const prev = state.nodeLookup.get(node.id);
-          return [node.id, { ...node, measured: prev?.measured ?? {} }];
+          return [
+            node.id,
+            {
+              ...node,
+              internals: { measured: prev?.internals?.measured ?? {}, zIndex: node.zIndex ?? 0 },
+            },
+          ];
         }),
       );
       return {
@@ -270,7 +276,13 @@ export default function storeReducer(state: StoreStateType, action: StoreAction)
         const nextNodeLookup = new Map(
           nextNodes.map((node) => {
             const prev = state.nodeLookup.get(node.id);
-            return [node.id, { ...node, measured: prev?.measured ?? {} }];
+            return [
+              node.id,
+              {
+                ...node,
+                internals: { measured: prev?.internals?.measured ?? {}, zIndex: node.zIndex ?? 0 },
+              },
+            ];
           }),
         );
         return {
