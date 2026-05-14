@@ -1,5 +1,15 @@
 import PanZoom from "../helper/PanZoom";
-import { type Transform, type Viewport } from ".";
+import {
+  type Edge,
+  type EdgeChange,
+  type Node,
+  type NodeChange,
+  type Transform,
+  type Viewport,
+  type InternalNode,
+  type NodeLookup,
+  type EdgeLookup,
+} from ".";
 
 // 静态配置, 来自 props，初始化后不变（从 props 中获取初始化后恒定不变 ）
 export type StoreConfig = {
@@ -8,9 +18,17 @@ export type StoreConfig = {
 };
 
 // data 业务状态，中低频变化（秒级/分钟级）
-export type StoreData = {
+export type StoreData<NodeType extends Node = Node, EdgeType extends Edge = Edge> = {
   minZoom: number; // 缩放比例（scale）
   maxZoom: number;
+
+  nodes: NodeType[];
+  edges: EdgeType[];
+  nodeLookup: NodeLookup<InternalNode<NodeType>>;
+  edgeLookup: EdgeLookup<EdgeType>;
+  onNodesChange?: ((changes: NodeChange<NodeType>[]) => void) | null;
+  onEdgesChange?: ((changes: EdgeChange<EdgeType>[]) => void) | null;
+
   defaultViewport: Viewport;
   panZoom: PanZoom | null;
   isInteractive: boolean;
@@ -29,13 +47,19 @@ export type StoreReactive = {
   isPanning: boolean;
 };
 
-export type StoreStateType = StoreConfig & StoreData & StoreReactive;
+export type StoreStateType<
+  NodeType extends Node = Node,
+  EdgeType extends Edge = Edge,
+> = StoreConfig & StoreData<NodeType, EdgeType> & StoreReactive;
 
 export type StoreAction =
   | { type: "setZoom"; payload: number }
   | { type: "transform"; payload: StoreReactive["transform"] }
   | { type: "syncViewport"; payload: Viewport }
   | { type: "setDefaultViewport"; payload: Viewport }
+  | { type: "setNodeLayout"; payload: { id: string; width: number; height: number } }
+  | { type: "applyNodeChanges"; payload: NodeChange[] }
+  | { type: "applyEdgeChanges"; payload: EdgeChange[] }
   | { type: "setMinZoom"; payload: number }
   | { type: "setMaxZoom"; payload: number }
   | { type: "setInteractivity"; payload: boolean }

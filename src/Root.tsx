@@ -1,5 +1,6 @@
 import StoreProvider from "./components/StoreProvider";
 import StoreUpdater from "./components/StoreUpdater";
+import EdgeRenderer from "./container/EdgeRenderer";
 import NodeRenderer from "./container/NodeRenderer";
 import Pane from "./container/Pane";
 import FlowViewport from "./container/Viewport";
@@ -8,6 +9,13 @@ import { type RootPropsType, type Viewport } from "./types";
 import { memo, useId, type CSSProperties } from "react";
 
 const initViewport: Viewport = { x: 0, y: 0, zoom: 10 };
+const wrapperStyle: CSSProperties = {
+  width: "100%",
+  height: "100%",
+  overflow: "hidden",
+  position: "relative",
+  zIndex: 0,
+};
 
 function Root(props: RootPropsType) {
   const {
@@ -16,6 +24,12 @@ function Root(props: RootPropsType) {
     children,
     minZoom = 0.5,
     maxZoom = 2,
+    defaultNodes,
+    defaultEdges,
+    nodes,
+    edges,
+    onNodesChange,
+    onEdgesChange,
     defaultViewport = initViewport,
     viewport,
     onViewportChange,
@@ -28,15 +42,16 @@ function Root(props: RootPropsType) {
   const rfId = id ?? `Root-${useId()}`;
 
   return (
-    <div
-      id={rfId}
-      style={{ position: "relative", width: "100%", height: "100%", overflow: "hidden", ...style }}
-    >
+    <div id={rfId} style={{ ...style, ...wrapperStyle }}>
       {/* 根据 props 初始化全局状态  */}
       <StoreProvider
         rfId={rfId}
         minZoom={minZoom}
         maxZoom={maxZoom}
+        defaultNodes={defaultNodes}
+        nodes={nodes}
+        defaultEdges={defaultEdges}
+        edges={edges}
         defaultViewport={defaultViewport}
         viewport={viewport}
         zoomOnScroll={zoomOnScroll}
@@ -49,6 +64,10 @@ function Root(props: RootPropsType) {
           rfId={rfId}
           minZoom={minZoom}
           maxZoom={maxZoom}
+          nodes={nodes}
+          onNodesChange={onNodesChange}
+          edges={edges}
+          onEdgesChange={onEdgesChange}
           defaultViewport={defaultViewport}
           viewport={viewport}
           zoomOnScroll={zoomOnScroll}
@@ -59,6 +78,7 @@ function Root(props: RootPropsType) {
         <ZoomPane isControlledViewport={!!viewport} onViewportChange={onViewportChange}>
           <Pane>
             <FlowViewport>
+              <EdgeRenderer />
               <NodeRenderer />
             </FlowViewport>
           </Pane>

@@ -1,4 +1,4 @@
-import { type StoreStateType, type StoreAction } from "../types";
+import { type EdgeChange, type NodeChange, type StoreAction, type StoreStateType } from "../types";
 import PanZoom from "../helper/PanZoom";
 
 function isFiniteNumber(value: unknown): value is number {
@@ -7,6 +7,106 @@ function isFiniteNumber(value: unknown): value is number {
 
 function clampZoom(zoom: number, minZoom: number, maxZoom: number) {
   return Math.max(Math.min(zoom, maxZoom), minZoom);
+}
+
+function normalizeEdges(edges: StoreStateType["edges"]) {
+  let changed = false;
+  const nextEdges = edges.map((edge, index) => {
+    if (edge.id) return edge;
+    changed = true;
+    return { ...edge, id: `${edge.source}-${edge.target}-${index}` };
+  });
+  return changed ? nextEdges : edges;
+}
+
+function applyNodeChanges(
+  nodes: StoreStateType["nodes"],
+  changes: NodeChange[],
+): StoreStateType["nodes"] {
+  if (changes.length === 0) return nodes;
+
+  const removeIds = new Set<string>();
+  const selectMap = new Map<string, boolean>();
+  const positionMap = new Map<string, { x: number; y: number }>();
+
+  for (const change of changes) {
+    if (change.type === "remove") {
+      removeIds.add(change.id);
+    } else if (change.type === "select") {
+      selectMap.set(change.id, change.selected);
+    } else if (change.type === "position") {
+      positionMap.set(change.id, change.position);
+    }
+  }
+
+  let changed = false;
+  const nextNodes: StoreStateType["nodes"] = [];
+  for (const node of nodes) {
+    if (removeIds.has(node.id)) {
+      changed = true;
+      continue;
+    }
+
+    const nextSelected = selectMap.get(node.id);
+    const nextPosition = positionMap.get(node.id);
+
+    if (nextSelected === undefined && nextPosition === undefined) {
+      nextNodes.push(node);
+      continue;
+    }
+
+    changed = true;
+    nextNodes.push({
+      ...node,
+      selected: nextSelected ?? node.selected,
+      position: nextPosition ? { x: nextPosition.x, y: nextPosition.y } : node.position,
+    });
+  }
+
+  return changed ? nextNodes : nodes;
+}
+
+function applyEdgeChanges(
+  edges: StoreStateType["edges"],
+  changes: EdgeChange[],
+): StoreStateType["edges"] {
+  if (changes.length === 0) return edges;
+
+  const removeIds = new Set<string>();
+  const selectMap = new Map<string, boolean>();
+
+  for (const change of changes) {
+    if (change.type === "remove") {
+      removeIds.add(change.id);
+    } else if (change.type === "select") {
+      selectMap.set(change.id, change.selected);
+    }
+  }
+
+  let changed = false;
+  const nextEdges: StoreStateType["edges"] = [];
+  for (const edge of edges) {
+    const id = edge.id;
+    if (!id) {
+      nextEdges.push(edge);
+      continue;
+    }
+    if (removeIds.has(id)) {
+      changed = true;
+      continue;
+    }
+
+    const nextSelected = selectMap.get(id);
+    if (nextSelected === undefined) {
+      nextEdges.push(edge);
+      continue;
+    }
+
+    changed = true;
+    nextEdges.push({ ...edge, selected: nextSelected });
+  }
+
+  return changed ? nextEdges : edges;
 }
 
 export default function storeReducer(state: StoreStateType, action: StoreAction): StoreStateType {
@@ -62,6 +162,48 @@ export default function storeReducer(state: StoreStateType, action: StoreAction)
         return state;
       }
       return { ...state, defaultViewport: { x, y, zoom: nextZoom } };
+    }
+    case "setNodeLayout": {
+      const { id, width, height } = action.payload;
+      if (typeof id !== "string" || id.length === 0) return state;
+      if (!isFiniteNumber(width) || !isFiniteNumber(height)) return state;
+      if (width <= 0 || height <= 0) return state;
+
+      const node = state.nodeLookup.get(id);
+      if (!node) return state;
+      const prevMeasured = node.measured;
+      if (prevMeasured && prevMeasured.width === width && prevMeasured.height === height) {
+        return state;
+      }
+
+      const nextNodeLookup = new Map(state.nodeLookup);
+      nextNodeLookup.set(id, {
+        ...node,
+        measured: { width, height },
+      });
+      return { ...state, nodeLookup: nextNodeLookup };
+    }
+    case "applyNodeChanges": {
+      const nextNodes = applyNodeChanges(state.nodes, action.payload);
+      if (nextNodes === state.nodes) return state;
+      const nextNodeLookup = new Map(
+        nextNodes.map((node) => {
+          const prev = state.nodeLookup.get(node.id);
+          return [node.id, { ...node, measured: prev?.measured ?? {} }];
+        }),
+      );
+      return {
+        ...state,
+        nodes: nextNodes,
+        nodeLookup: nextNodeLookup,
+      };
+    }
+    case "applyEdgeChanges": {
+      const nextEdges = applyEdgeChanges(state.edges, action.payload);
+      if (nextEdges === state.edges) return state;
+      const normalized = normalizeEdges(nextEdges);
+      const nextEdgeLookup = new Map(normalized.map((edge) => [edge.id!, edge]));
+      return { ...state, edges: normalized, edgeLookup: nextEdgeLookup };
     }
     case "setMinZoom": {
       const nextMinZoom = action.payload;
@@ -123,6 +265,25 @@ export default function storeReducer(state: StoreStateType, action: StoreAction)
     case "setStore": {
       const { key, value } = action.payload;
       if (state[key] === value) return state;
+      if (key === "nodes" && Array.isArray(value)) {
+        const nextNodes = value as StoreStateType["nodes"];
+        const nextNodeLookup = new Map(
+          nextNodes.map((node) => {
+            const prev = state.nodeLookup.get(node.id);
+            return [node.id, { ...node, measured: prev?.measured ?? {} }];
+          }),
+        );
+        return {
+          ...state,
+          nodes: nextNodes,
+          nodeLookup: nextNodeLookup,
+        };
+      }
+      if (key === "edges" && Array.isArray(value)) {
+        const nextEdges = normalizeEdges(value as StoreStateType["edges"]);
+        const nextEdgeLookup = new Map(nextEdges.map((edge) => [edge.id!, edge]));
+        return { ...state, edges: nextEdges, edgeLookup: nextEdgeLookup };
+      }
       return { ...state, [key]: value };
     }
     default:

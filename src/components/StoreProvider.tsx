@@ -14,6 +14,12 @@ type StoreProviderProps = {
   RootPropsType,
   | "minZoom"
   | "maxZoom"
+  | "defaultNodes"
+  | "nodes"
+  | "onNodesChange"
+  | "defaultEdges"
+  | "edges"
+  | "onEdgesChange"
   | "defaultViewport"
   | "viewport"
   | "zoomOnScroll"
@@ -22,9 +28,21 @@ type StoreProviderProps = {
   | "panOnScroll"
 >;
 
+function normalizeEdges(edges: StoreStateType["edges"]) {
+  let changed = false;
+  const nextEdges = edges.map((edge, index) => {
+    if (edge.id) return edge;
+    changed = true;
+    return { ...edge, id: `${edge.source}-${edge.target}-${index}` };
+  });
+  return changed ? nextEdges : edges;
+}
+
 function initState(props: StoreProviderProps): StoreStateType {
   const minZoom = props.minZoom ?? initialState.minZoom;
   const maxZoom = props.maxZoom ?? initialState.maxZoom;
+  const nodes = props.nodes ?? props.defaultNodes ?? initialState.nodes;
+  const edges = normalizeEdges(props.edges ?? props.defaultEdges ?? initialState.edges);
   const resolvedDefaultViewport = props.defaultViewport ?? initialState.defaultViewport;
   const zoomOnScroll = props.zoomOnScroll ?? initialState.zoomOnScroll;
   const zoomOnPinch = props.zoomOnPinch ?? initialState.zoomOnPinch;
@@ -42,6 +60,12 @@ function initState(props: StoreProviderProps): StoreStateType {
     rfId: props.rfId,
     minZoom,
     maxZoom,
+    nodes,
+    edges,
+    nodeLookup: new Map(nodes.map((node) => [node.id, { ...node, measured: {} }])),
+    edgeLookup: new Map(edges.map((edge) => [edge.id!, edge])),
+    onNodesChange: props.onNodesChange,
+    onEdgesChange: props.onEdgesChange,
     defaultViewport: {
       x: resolvedDefaultViewport.x,
       y: resolvedDefaultViewport.y,
@@ -77,6 +101,10 @@ export default function StoreProvider(props: StoreProviderProps) {
     () => ({
       minZoom: state.minZoom,
       maxZoom: state.maxZoom,
+      nodes: state.nodes,
+      edges: state.edges,
+      nodeLookup: state.nodeLookup,
+      edgeLookup: state.edgeLookup,
       defaultViewport: state.defaultViewport,
       panZoom: state.panZoom,
       isInteractive: state.isInteractive,
@@ -88,6 +116,10 @@ export default function StoreProvider(props: StoreProviderProps) {
     [
       state.minZoom,
       state.maxZoom,
+      state.nodes,
+      state.edges,
+      state.nodeLookup,
+      state.edgeLookup,
       state.defaultViewport.x,
       state.defaultViewport.y,
       state.defaultViewport.zoom,

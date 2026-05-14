@@ -16,27 +16,48 @@ export default function App() {
         </button>
       </div>
 
-      <Root style={{ width: "100%", height: 400, border: "1px solid" }}>
-        <Toolbar>
-          <DisplayZoom />
-          <ZoomController />
-        </Toolbar>
-        <Background id="1" variant="lines" gap={10} color="#f4f4f480" />
-        <Background id="3" variant="lines" gap={100} />
-        <Controls />
-      </Root>
+      <div style={{ width: "100%", height: 400, border: "1px solid" }}>
+        <Root
+          defaultNodes={[
+            {
+              id: "1",
+              type: "input",
+              position: { x: 60, y: 80 },
+              data: { label: `Count ${count}` },
+            },
+            { id: "2", position: { x: 300, y: 160 }, data: { label: "Transform" } },
+            { id: "3", type: "output", position: { x: 560, y: 80 }, data: { label: "Result" } },
+          ]}
+          defaultEdges={[
+            { id: "e1-2", source: "1", target: "2", animated: true },
+            { id: "e2-3", source: "2", target: "3" },
+          ]}
+        >
+          <Toolbar>
+            <DisplayZoom />
+            <ZoomController />
+          </Toolbar>
+          <Background id="1" variant="lines" gap={10} color="#f4f4f480" />
+          <Background id="3" variant="lines" gap={100} />
+          <Controls />
+        </Root>
+      </div>
 
-      <Root style={{ width: 300, height: 200, border: "1px solid" }}>
-        <Toolbar>
-          <DisplayZoom />
-        </Toolbar>
-      </Root>
+      <div style={{ width: "100%", height: 400, border: "1px solid" }}>
+        <Root>
+          <Toolbar>
+            <DisplayZoom />
+          </Toolbar>
+        </Root>
+      </div>
 
-      <Root style={{ width: 300, height: 200, border: "1px solid" }}>
-        <Toolbar>
-          <DisplayZoom />
-        </Toolbar>
-      </Root>
+      <div style={{ width: "100%", height: 400, border: "1px solid" }}>
+        <Root>
+          <Toolbar>
+            <DisplayZoom />
+          </Toolbar>
+        </Root>
+      </div>
     </div>
   );
 }

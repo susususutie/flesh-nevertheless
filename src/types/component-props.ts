@@ -1,9 +1,36 @@
 import { type HTMLAttributes } from "react";
-import { type Viewport } from ".";
+import { type Edge, type EdgeChange, type Node, type NodeChange, type Viewport } from ".";
 
-export type RootPropsType = HTMLAttributes<HTMLDivElement> & {
+/**
+ * 如果使用自定义节点:
+ * type MyNode = Node | CustomNode
+ */
+export type RootPropsType<
+  NodeType extends Node = Node,
+  EdgeType extends Edge = Edge,
+> = HTMLAttributes<HTMLDivElement> & {
   minZoom?: number;
   maxZoom?: number;
+
+  /**
+   * 非受控模式，默认节点，不会自动更新
+   */
+  defaultNodes?: NodeType[];
+  /**
+   * 手动传入 nodes 时，受控模式
+   */
+  nodes?: NodeType[];
+  onNodesChange?: (changes: NodeChange[]) => void;
+
+  /**
+   * 非受控模式，默认边，不会自动更新
+   */
+  defaultEdges?: EdgeType[];
+  /**
+   * 手动传入 edges 时，受控模式
+   */
+  edges?: EdgeType[];
+  onEdgesChange?: (changes: EdgeChange[]) => void;
 
   defaultViewport?: Viewport;
   /**

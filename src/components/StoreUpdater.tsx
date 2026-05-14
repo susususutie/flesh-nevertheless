@@ -7,6 +7,10 @@ type StoreUpdaterProps = { rfId: string } & Pick<
   RootPropsType,
   | "minZoom"
   | "maxZoom"
+  | "nodes"
+  | "onNodesChange"
+  | "edges"
+  | "onEdgesChange"
   | "defaultViewport"
   | "viewport"
   | "zoomOnScroll"
@@ -19,6 +23,10 @@ const fieldsToTrack = [
   "rfId",
   "minZoom",
   "maxZoom",
+  "nodes",
+  "onNodesChange",
+  "edges",
+  "onEdgesChange",
   "defaultViewport",
   "zoomOnScroll",
   "zoomOnPinch",
@@ -29,6 +37,10 @@ const fieldsInitialValues = {
   rfId: initialState.rfId,
   minZoom: initialState.minZoom,
   maxZoom: initialState.maxZoom,
+  nodes: initialState.nodes,
+  onNodesChange: initialState.onNodesChange,
+  edges: initialState.edges,
+  onEdgesChange: initialState.onEdgesChange,
   defaultViewport: initialState.defaultViewport,
   zoomOnScroll: initialState.zoomOnScroll,
   zoomOnPinch: initialState.zoomOnPinch,
@@ -42,7 +54,9 @@ const fieldsInitialValues = {
 export default function StoreUpdater(props: StoreUpdaterProps) {
   const dispatch = useDispatch();
 
-  const previousFields = useRef<Partial<StoreUpdaterProps>>(fieldsInitialValues);
+  const previousFields = useRef<Partial<StoreUpdaterProps>>(
+    fieldsInitialValues as Partial<StoreUpdaterProps>,
+  );
   useEffect(
     () => {
       for (const fieldName of fieldsToTrack) {
