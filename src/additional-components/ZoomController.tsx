@@ -7,7 +7,7 @@ export default function ZoomController() {
 
   return (
     <div style={{ display: "flex", gap: 8 }}>
-      <button onClick={() => dispatch({ type: "reset" })}>Reset</button>
+      <button onClick={() => data.panZoom?.setViewport(data.defaultViewport)}>Reset</button>
       <button
         onClick={() =>
           dispatch({

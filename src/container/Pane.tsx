@@ -30,6 +30,7 @@ export default function Pane({ children }: { children: ReactNode }) {
     endX: number;
     endY: number;
   }>({ active: false, startX: 0, startY: 0, endX: 0, endY: 0 });
+  const [isSelectionKeyPressed, setIsSelectionKeyPressed] = useState(false);
 
   const clearSelection = () => {
     const nodeChanges: NodeChange[] = [];
@@ -46,10 +47,10 @@ export default function Pane({ children }: { children: ReactNode }) {
     if (nodeChanges.length > 0) data.onNodesChange?.(nodeChanges);
     if (edgeChanges.length > 0) data.onEdgesChange?.(edgeChanges);
 
-    if (nodeChanges.length > 0) {
+    if (nodeChanges.length > 0 && !data.nodesControlled) {
       dispatch({ type: "applyNodeChanges", payload: nodeChanges });
     }
-    if (edgeChanges.length > 0) {
+    if (edgeChanges.length > 0 && !data.edgesControlled) {
       dispatch({ type: "applyEdgeChanges", payload: edgeChanges });
     }
   };
@@ -58,10 +59,10 @@ export default function Pane({ children }: { children: ReactNode }) {
     if (nodeChanges.length > 0) data.onNodesChange?.(nodeChanges);
     if (edgeChanges.length > 0) data.onEdgesChange?.(edgeChanges);
 
-    if (nodeChanges.length > 0) {
+    if (nodeChanges.length > 0 && !data.nodesControlled) {
       dispatch({ type: "applyNodeChanges", payload: nodeChanges });
     }
-    if (edgeChanges.length > 0) {
+    if (edgeChanges.length > 0 && !data.edgesControlled) {
       dispatch({ type: "applyEdgeChanges", payload: edgeChanges });
     }
   };
@@ -105,6 +106,26 @@ export default function Pane({ children }: { children: ReactNode }) {
     return () => el.removeEventListener("keydown", onKeyDown);
   }, [config.domNode, data.nodes, data.edges]);
 
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Shift") setIsSelectionKeyPressed(true);
+    };
+    const onKeyUp = (event: KeyboardEvent) => {
+      if (event.key === "Shift") setIsSelectionKeyPressed(false);
+    };
+    const onBlur = () => setIsSelectionKeyPressed(false);
+
+    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("keyup", onKeyUp);
+    window.addEventListener("blur", onBlur);
+
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("keyup", onKeyUp);
+      window.removeEventListener("blur", onBlur);
+    };
+  }, []);
+
   const selectionBoxStyle = useMemo(() => {
     if (!userSelection.active) return null;
     const left = Math.min(userSelection.startX, userSelection.endX);
@@ -113,12 +134,21 @@ export default function Pane({ children }: { children: ReactNode }) {
     const height = Math.abs(userSelection.endY - userSelection.startY);
     return { left, top, width, height };
   }, [userSelection]);
+  const canPan = data.panOnScroll || data.zoomOnScroll || data.zoomOnPinch;
+  const cursor =
+    isSelectionKeyPressed || userSelection.active
+      ? "pointer"
+      : reactive.isPanning
+        ? "grabbing"
+        : canPan
+          ? "grab"
+          : undefined;
 
   return (
     <div
       ref={paneRef}
       className="react-flow__pane"
-      style={{ position: "absolute", width: "100%", height: "100%", top: 0, left: 0 }}
+      style={{ position: "absolute", width: "100%", height: "100%", top: 0, left: 0, cursor }}
       onPointerDown={(event) => {
         if (event.button !== 0) return;
 
@@ -179,7 +209,9 @@ export default function Pane({ children }: { children: ReactNode }) {
 
           const selectedByBox = new Set<string>();
           for (const node of data.nodes) {
-            if (node.selectable === false) continue;
+            const isSelectable =
+              node.selectable === true || (data.nodesSelectable && node.selectable === undefined);
+            if (!isSelectable) continue;
             if (node.hidden) continue;
 
             const lookup = data.nodeLookup.get(node.id);

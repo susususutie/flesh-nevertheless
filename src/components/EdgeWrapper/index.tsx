@@ -41,6 +41,7 @@ export default function EdgeWrapper(props: EdgeWrapperProps) {
 
   const handleSelect = (event: React.PointerEvent) => {
     if (!edge.id) return;
+    if (edge.selectable === false) return;
     if (event.button !== 0) return;
     event.preventDefault();
     event.stopPropagation();
@@ -66,10 +67,10 @@ export default function EdgeWrapper(props: EdgeWrapperProps) {
     if (nodeChanges.length > 0) data.onNodesChange?.(nodeChanges);
     if (edgeChanges.length > 0) data.onEdgesChange?.(edgeChanges);
 
-    if (nodeChanges.length > 0) {
+    if (nodeChanges.length > 0 && !data.nodesControlled) {
       dispatch({ type: "applyNodeChanges", payload: nodeChanges });
     }
-    if (edgeChanges.length > 0) {
+    if (edgeChanges.length > 0 && !data.edgesControlled) {
       dispatch({ type: "applyEdgeChanges", payload: edgeChanges });
     }
   };

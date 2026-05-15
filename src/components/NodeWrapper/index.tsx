@@ -1,9 +1,10 @@
-import { type PointerEvent as ReactPointerEvent, useEffect, useRef } from "react";
+import { type PointerEvent as ReactPointerEvent, useCallback, useEffect, useRef } from "react";
 import useData from "../../hooks/useData";
 import useDispatch from "../../hooks/useDispatch";
 import useReactive from "../../hooks/useReactive";
 import NodeIdContext from "../../contexts/NodeIdContext";
 import { builtinNodeTypes } from "./utils.ts";
+import { createDragState, bindDocumentDragListeners, type DragState } from "../../helper/NodeDrag";
 import { type EdgeChange, type NodeChange, type InternalNode, type Node } from "../../types";
 
 type NodeWrapperProps = {
@@ -28,13 +29,10 @@ export default function NodeWrapper(props: NodeWrapperProps) {
   const dispatch = useDispatch();
   const reactive = useReactive();
   const nodeRef = useRef<HTMLDivElement | null>(null);
-  const dragRef = useRef<{
-    pointerId: number;
-    startClientX: number;
-    startClientY: number;
-    startPositions: Map<string, { x: number; y: number }>;
-    moved: boolean;
-  } | null>(null);
+  const dragRef = useRef<DragState | null>(null);
+  const cleanupDragRef = useRef<(() => void) | null>(null);
+  const panZoomRef = useRef(data.panZoom);
+  panZoomRef.current = data.panZoom;
 
   const node = data.nodeLookup.get(id) as InternalNode<Node>;
 
@@ -82,16 +80,16 @@ export default function NodeWrapper(props: NodeWrapperProps) {
     if (nodeChanges.length > 0) data.onNodesChange?.(nodeChanges);
     if (edgeChanges.length > 0) data.onEdgesChange?.(edgeChanges);
 
-    if (nodeChanges.length > 0) {
+    if (nodeChanges.length > 0 && !data.nodesControlled) {
       dispatch({ type: "applyNodeChanges", payload: nodeChanges });
     }
-    if (edgeChanges.length > 0) {
+    if (edgeChanges.length > 0 && !data.edgesControlled) {
       dispatch({ type: "applyEdgeChanges", payload: edgeChanges });
     }
   };
 
   const selectNode = (event: ReactPointerEvent<HTMLDivElement>) => {
-    if (node.selectable === false) return;
+    if (!isSelectable) return;
 
     const multi = event.shiftKey || event.metaKey || event.ctrlKey;
     const nodeChanges: NodeChange[] = [];
@@ -102,6 +100,8 @@ export default function NodeWrapper(props: NodeWrapperProps) {
       applyChanges(nodeChanges, edgeChanges);
       return;
     }
+
+    if (node.selected) return;
 
     for (const n of data.nodes) {
       const selected = n.id === id;
@@ -127,6 +127,49 @@ export default function NodeWrapper(props: NodeWrapperProps) {
     return false;
   };
 
+  const startDrag = useCallback(
+    (event: ReactPointerEvent<HTMLDivElement>) => {
+      const el = nodeRef.current;
+      if (!el) return;
+
+      const selectedIds = data.nodes.filter((n) => n.selected).map((n) => n.id);
+      const moveIds = node.selected && selectedIds.length > 0 ? selectedIds : ([id] as string[]);
+
+      const items = data.nodes
+        .filter((n) => moveIds.includes(n.id))
+        .map((n) => ({ id: n.id, position: { x: n.position.x, y: n.position.y } }));
+
+      dragRef.current = createDragState(event.pointerId, event.clientX, event.clientY, items);
+
+      el.setPointerCapture(event.pointerId);
+
+      cleanupDragRef.current = bindDocumentDragListeners(dragRef.current, {
+        getZoom: () => reactive.transform[2] || 1,
+        onStart: () => {
+          panZoomRef.current?.setOptions({ isInteractive: false });
+        },
+        onChange: (nodeChanges) => {
+          data.onNodesChange?.(nodeChanges);
+          if (!data.nodesControlled) {
+            dispatch({ type: "applyNodeChanges", payload: nodeChanges });
+          }
+        },
+        onEnd: (nodeChanges) => {
+          data.onNodesChange?.(nodeChanges);
+          if (!data.nodesControlled) {
+            dispatch({ type: "applyNodeChanges", payload: nodeChanges });
+          }
+          panZoomRef.current?.setOptions({ isInteractive: true });
+          dragRef.current = null;
+          cleanupDragRef.current = null;
+        },
+        panBy: (dx, dy) => panZoomRef.current?.panBy(dx, dy),
+        getPaneRect: () => panZoomRef.current?.getBoundingClientRect() ?? null,
+      });
+    },
+    [id, data, dispatch, reactive, node.selected],
+  );
+
   const onPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (event.button !== 0) return;
 
@@ -137,60 +180,9 @@ export default function NodeWrapper(props: NodeWrapperProps) {
 
     selectNode(event);
 
-    if (node.draggable === false) return;
+    if (!isDraggable) return;
 
-    const el = nodeRef.current;
-    if (!el) return;
-    el.setPointerCapture(event.pointerId);
-
-    const selectedIds = data.nodes.filter((n) => n.selected).map((n) => n.id);
-    const moveIds = node.selected && selectedIds.length > 0 ? selectedIds : ([id] as string[]);
-
-    dragRef.current = {
-      pointerId: event.pointerId,
-      startClientX: event.clientX,
-      startClientY: event.clientY,
-      moved: false,
-      startPositions: new Map(
-        data.nodes
-          .filter((n) => moveIds.includes(n.id))
-          .map((n) => [n.id, { x: n.position.x, y: n.position.y }] as const),
-      ),
-    };
-  };
-
-  const onPointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
-    const drag = dragRef.current;
-    if (!drag || drag.pointerId !== event.pointerId) return;
-
-    if (!drag.moved) {
-      drag.moved = true;
-    }
-
-    event.preventDefault();
-    event.stopPropagation();
-
-    const zoom = reactive.transform[2] || 1;
-    const dx = (event.clientX - drag.startClientX) / zoom;
-    const dy = (event.clientY - drag.startClientY) / zoom;
-
-    const nodeChanges: NodeChange[] = [];
-    for (const [nid, startPos] of drag.startPositions) {
-      nodeChanges.push({
-        id: nid,
-        type: "position",
-        position: { x: startPos.x + dx, y: startPos.y + dy },
-        dragging: true,
-      });
-    }
-    applyChanges(nodeChanges, []);
-  };
-
-  const onPointerUp = (event: ReactPointerEvent<HTMLDivElement>) => {
-    const drag = dragRef.current;
-    if (!drag || drag.pointerId !== event.pointerId) return;
-
-    dragRef.current = null;
+    startDrag(event);
   };
 
   const wrapperStyle: React.CSSProperties = {
@@ -201,15 +193,24 @@ export default function NodeWrapper(props: NodeWrapperProps) {
     zIndex: node.zIndex ?? 0,
     border: node.selected ? "1px solid #2563eb" : "1px solid transparent",
     borderRadius: 8,
-    cursor: node.draggable === false ? "default" : "grab",
+    cursor: !isDraggable ? "default" : node.dragging ? "grabbing" : "grab",
   };
+
+  useEffect(() => {
+    return () => {
+      if (cleanupDragRef.current) {
+        cleanupDragRef.current();
+        panZoomRef.current?.setOptions({ isInteractive: true });
+        cleanupDragRef.current = null;
+        dragRef.current = null;
+      }
+    };
+  }, []);
 
   return (
     <div
       ref={nodeRef}
       onPointerDown={onPointerDown}
-      onPointerMove={onPointerMove}
-      onPointerUp={onPointerUp}
       style={wrapperStyle}
       className={`react-flow__node react-flow__node-${nodeType}`}
     >

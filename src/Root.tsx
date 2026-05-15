@@ -42,12 +42,13 @@ function Root(props: RootPropsType) {
     zoomOnPinch,
     zoomOnDoubleClick,
     panOnScroll,
+    ...rest
   } = props;
 
   const rfId = id ?? `Root-${useId()}`;
 
   return (
-    <div id={rfId} style={{ ...style, ...wrapperStyle }}>
+    <div {...rest} id={rfId} style={{ ...wrapperStyle, ...style }}>
       {/* 根据 props 初始化全局状态  */}
       <StoreProvider
         rfId={rfId}
@@ -80,14 +81,17 @@ function Root(props: RootPropsType) {
           onEdgesChange={onEdgesChange}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
-          defaultViewport={defaultViewport}
           viewport={viewport}
           zoomOnScroll={zoomOnScroll}
           zoomOnPinch={zoomOnPinch}
           zoomOnDoubleClick={zoomOnDoubleClick}
           panOnScroll={panOnScroll}
         />
-        <ZoomPane isControlledViewport={!!viewport} onViewportChange={onViewportChange}>
+        <ZoomPane
+          isControlledViewport={!!viewport}
+          viewport={viewport}
+          onViewportChange={onViewportChange}
+        >
           <Pane>
             <FlowViewport>
               <EdgeRenderer />

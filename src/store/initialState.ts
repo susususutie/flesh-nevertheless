@@ -7,6 +7,8 @@ const initialState: StoreStateType = {
   maxZoom: 2,
   nodes: [],
   edges: [],
+  nodesControlled: false,
+  edgesControlled: false,
   nodeLookup: new Map(),
   edgeLookup: new Map(),
   nodeTypes: {} as StoreStateType["nodeTypes"],

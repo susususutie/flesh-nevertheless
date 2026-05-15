@@ -26,6 +26,8 @@ export type StoreData<NodeType extends Node = Node, EdgeType extends Edge = Edge
 
   nodes: NodeType[];
   edges: EdgeType[];
+  nodesControlled: boolean;
+  edgesControlled: boolean;
   nodeLookup: NodeLookup<InternalNode<NodeType>>;
   edgeLookup: EdgeLookup<EdgeType>;
   nodeTypes: NodeTypes<NodeType>;
@@ -59,10 +61,8 @@ export type StoreStateType<
 > = StoreConfig & StoreData<NodeType, EdgeType> & StoreReactive;
 
 export type StoreAction =
-  | { type: "setZoom"; payload: number }
   | { type: "transform"; payload: StoreReactive["transform"] }
   | { type: "syncViewport"; payload: Viewport }
-  | { type: "setDefaultViewport"; payload: Viewport }
   // 更新节点测量尺寸
   | { type: "updateInternalNodeMeasured"; payload: { id: string; width: number; height: number } }
   | { type: "applyNodeChanges"; payload: NodeChange[] }
@@ -71,7 +71,7 @@ export type StoreAction =
   | { type: "setMaxZoom"; payload: number }
   | { type: "setInteractivity"; payload: boolean }
   | { type: "toggleInteractivity" }
-  | { type: "reset" }
+  | { type: "setPanning"; payload: boolean }
   | { type: "setPanZoom"; payload: PanZoom | null }
   | {
       type: "setStore";

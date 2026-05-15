@@ -6,6 +6,7 @@ type Options = {
   maxZoom: number;
   viewport: Viewport;
   onTransformChange: (transform: Transform) => void;
+  onPanStateChange?: (isPanning: boolean) => void;
   isInteractive?: boolean;
   zoomOnScroll?: boolean;
   zoomOnPinch?: boolean;
@@ -20,6 +21,7 @@ class PanZoom {
   private maxZoom: number;
   private viewport: Viewport;
   private onTransformChange: (transform: Transform) => void;
+  private onPanStateChange: ((isPanning: boolean) => void) | null;
   private destroyed: boolean;
   private isInteractive: boolean;
   private zoomOnScroll: boolean;
@@ -46,6 +48,7 @@ class PanZoom {
     this.maxZoom = options.maxZoom;
     this.viewport = options.viewport;
     this.onTransformChange = options.onTransformChange;
+    this.onPanStateChange = options.onPanStateChange ?? null;
     this.destroyed = false;
     this.isInteractive = options.isInteractive ?? true;
     this.zoomOnScroll = options.zoomOnScroll ?? true;
@@ -103,6 +106,7 @@ class PanZoom {
       this.mouseDown = true;
       this.panStartClient = { x: event.clientX, y: event.clientY };
       this.panStartViewport = { ...this.viewport };
+      this.#setPanning(true);
       event.preventDefault();
     };
 
@@ -124,6 +128,7 @@ class PanZoom {
       this.mouseDown = false;
       this.panStartClient = null;
       this.panStartViewport = null;
+      this.#setPanning(false);
     };
 
     const onTouchStart = (event: TouchEvent) => {
@@ -148,6 +153,7 @@ class PanZoom {
       this.#resetPinch();
       this.panStartClient = null;
       this.panStartViewport = null;
+      this.#setPanning(false);
     };
 
     const onGestureStart = (event: Event) => {
@@ -320,11 +326,16 @@ class PanZoom {
     this.lastPinchClient = null;
   }
 
+  #setPanning(isPanning: boolean) {
+    this.onPanStateChange?.(isPanning);
+  }
+
   #handleTouchStart(event: TouchEvent) {
     if (event.touches.length === 1) {
       const t = event.touches[0];
       this.panStartClient = { x: t.clientX, y: t.clientY };
       this.panStartViewport = { ...this.viewport };
+      this.#setPanning(true);
       event.preventDefault();
       return;
     }
@@ -340,6 +351,7 @@ class PanZoom {
     this.lastPinchClient = this.#getTouchesMidpoint(event.touches);
     this.panStartClient = null;
     this.panStartViewport = null;
+    this.#setPanning(false);
     event.preventDefault();
   }
 
@@ -392,6 +404,7 @@ class PanZoom {
     if (event.touches.length === 0) {
       this.panStartClient = null;
       this.panStartViewport = null;
+      this.#setPanning(false);
     }
   }
 
@@ -426,11 +439,23 @@ class PanZoom {
     return this.viewport;
   }
 
+  getBoundingClientRect(): DOMRect | null {
+    return this.el?.getBoundingClientRect() ?? null;
+  }
+
   setOptions(
     options: Partial<
       Pick<
         Options,
-        "isInteractive" | "zoomOnScroll" | "zoomOnPinch" | "zoomOnDoubleClick" | "panOnScroll"
+        | "minZoom"
+        | "maxZoom"
+        | "isInteractive"
+        | "zoomOnScroll"
+        | "zoomOnPinch"
+        | "zoomOnDoubleClick"
+        | "panOnScroll"
+        | "onTransformChange"
+        | "onPanStateChange"
       >
     >,
   ) {
@@ -447,13 +472,37 @@ class PanZoom {
         this.panStartViewport = null;
         this.#resetPinch();
         this.gestureStartZoom = null;
+        this.#setPanning(false);
       }
     }
 
+    if (options.minZoom !== undefined) this.minZoom = options.minZoom;
+    if (options.maxZoom !== undefined) this.maxZoom = options.maxZoom;
     if (options.zoomOnScroll !== undefined) this.zoomOnScroll = options.zoomOnScroll;
     if (options.zoomOnPinch !== undefined) this.zoomOnPinch = options.zoomOnPinch;
     if (options.zoomOnDoubleClick !== undefined) this.zoomOnDoubleClick = options.zoomOnDoubleClick;
     if (options.panOnScroll !== undefined) this.panOnScroll = options.panOnScroll;
+    if (options.onTransformChange !== undefined) this.onTransformChange = options.onTransformChange;
+    if (options.onPanStateChange !== undefined) {
+      this.onPanStateChange = options.onPanStateChange;
+    }
+  }
+
+  setViewport(viewport: Viewport) {
+    if (this.destroyed) return;
+    this.#commitViewport(viewport);
+  }
+
+  syncViewport(viewport: Viewport) {
+    if (this.destroyed) return;
+    if (
+      viewport.x === this.viewport.x &&
+      viewport.y === this.viewport.y &&
+      viewport.zoom === this.viewport.zoom
+    ) {
+      return;
+    }
+    this.viewport = viewport;
   }
 
   zoomIn(config?: { x: number; y: number }): Viewport | null {
@@ -499,6 +548,15 @@ class PanZoom {
     return this.#zoomToClient(zoomPoint.x, zoomPoint.y, zoom);
   }
 
+  panBy(dx: number, dy: number) {
+    if (this.destroyed) return;
+    this.#commitViewport({
+      x: this.viewport.x + dx,
+      y: this.viewport.y + dy,
+      zoom: this.viewport.zoom,
+    });
+  }
+
   destroy() {
     for (const cleanupFn of this.cleanupFns) cleanupFn();
     this.cleanupFns = [];
@@ -510,6 +568,7 @@ class PanZoom {
     this.panStartViewport = null;
     this.#resetPinch();
     this.gestureStartZoom = null;
+    this.#setPanning(false);
     this.el = null;
     this.destroyed = true;
   }

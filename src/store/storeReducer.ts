@@ -28,6 +28,7 @@ function applyNodeChanges(
   const removeIds = new Set<string>();
   const selectMap = new Map<string, boolean>();
   const positionMap = new Map<string, { x: number; y: number }>();
+  const draggingMap = new Map<string, boolean>();
 
   for (const change of changes) {
     if (change.type === "remove") {
@@ -36,6 +37,9 @@ function applyNodeChanges(
       selectMap.set(change.id, change.selected);
     } else if (change.type === "position") {
       positionMap.set(change.id, change.position);
+      if (typeof change.dragging === "boolean") {
+        draggingMap.set(change.id, change.dragging);
+      }
     }
   }
 
@@ -49,6 +53,7 @@ function applyNodeChanges(
 
     const nextSelected = selectMap.get(node.id);
     const nextPosition = positionMap.get(node.id);
+    const nextDragging = draggingMap.get(node.id);
 
     if (nextSelected === undefined && nextPosition === undefined) {
       nextNodes.push(node);
@@ -60,6 +65,7 @@ function applyNodeChanges(
       ...node,
       selected: nextSelected ?? node.selected,
       position: nextPosition ? { x: nextPosition.x, y: nextPosition.y } : node.position,
+      dragging: nextDragging !== undefined ? nextDragging : node.dragging,
     });
   }
 
@@ -111,17 +117,6 @@ function applyEdgeChanges(
 
 export default function storeReducer(state: StoreStateType, action: StoreAction): StoreStateType {
   switch (action.type) {
-    case "setZoom": {
-      let nextZoom = action.payload;
-      if (!isFiniteNumber(nextZoom)) {
-        return state;
-      }
-      nextZoom = clampZoom(nextZoom, state.minZoom, state.maxZoom);
-      if (nextZoom === state.transform[2]) {
-        return state;
-      }
-      return { ...state, transform: [state.transform[0], state.transform[1], nextZoom] };
-    }
     case "transform": {
       const [x, y, zoom] = action.payload;
 
@@ -143,25 +138,11 @@ export default function storeReducer(state: StoreStateType, action: StoreAction)
       if (!isFiniteNumber(x) || !isFiniteNumber(y) || !isFiniteNumber(zoom)) {
         return state;
       }
-      if (x === state.transform[0] && y === state.transform[1] && zoom === state.transform[2]) {
-        return state;
-      }
-      return { ...state, transform: [x, y, zoom] };
-    }
-    case "setDefaultViewport": {
-      const { x, y, zoom } = action.payload;
-      if (!isFiniteNumber(x) || !isFiniteNumber(y) || !isFiniteNumber(zoom)) {
-        return state;
-      }
       const nextZoom = clampZoom(zoom, state.minZoom, state.maxZoom);
-      if (
-        x === state.defaultViewport.x &&
-        y === state.defaultViewport.y &&
-        nextZoom === state.defaultViewport.zoom
-      ) {
+      if (x === state.transform[0] && y === state.transform[1] && nextZoom === state.transform[2]) {
         return state;
       }
-      return { ...state, defaultViewport: { x, y, zoom: nextZoom } };
+      return { ...state, transform: [x, y, nextZoom] };
     }
     case "updateInternalNodeMeasured": {
       const { id, width, height } = action.payload;
@@ -219,15 +200,7 @@ export default function storeReducer(state: StoreStateType, action: StoreAction)
       if (nextMinZoom === state.minZoom) {
         return state;
       }
-      const nextDefaultZoom = clampZoom(state.defaultViewport.zoom, nextMinZoom, state.maxZoom);
-      if (nextDefaultZoom === state.defaultViewport.zoom) {
-        return { ...state, minZoom: nextMinZoom };
-      }
-      return {
-        ...state,
-        minZoom: nextMinZoom,
-        defaultViewport: { ...state.defaultViewport, zoom: nextDefaultZoom },
-      };
+      return { ...state, minZoom: nextMinZoom };
     }
     case "setMaxZoom": {
       const nextMaxZoom = action.payload;
@@ -237,15 +210,7 @@ export default function storeReducer(state: StoreStateType, action: StoreAction)
       if (nextMaxZoom === state.maxZoom) {
         return state;
       }
-      const nextDefaultZoom = clampZoom(state.defaultViewport.zoom, state.minZoom, nextMaxZoom);
-      if (nextDefaultZoom === state.defaultViewport.zoom) {
-        return { ...state, maxZoom: nextMaxZoom };
-      }
-      return {
-        ...state,
-        maxZoom: nextMaxZoom,
-        defaultViewport: { ...state.defaultViewport, zoom: nextDefaultZoom },
-      };
+      return { ...state, maxZoom: nextMaxZoom };
     }
     case "setInteractivity": {
       if (typeof action.payload !== "boolean") return state;
@@ -265,11 +230,11 @@ export default function storeReducer(state: StoreStateType, action: StoreAction)
         nodesDraggable: !isInteractive,
         nodesConnectable: !isInteractive,
       };
-    case "reset":
-      return {
-        ...state,
-        transform: [state.defaultViewport.x, state.defaultViewport.y, state.defaultViewport.zoom],
-      };
+    case "setPanning": {
+      if (typeof action.payload !== "boolean") return state;
+      if (action.payload === state.isPanning) return state;
+      return { ...state, isPanning: action.payload };
+    }
     case "setPanZoom": {
       if (action.payload === null) {
         if (state.panZoom === null) return state;

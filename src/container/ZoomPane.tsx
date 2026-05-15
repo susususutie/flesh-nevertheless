@@ -1,12 +1,14 @@
 import { useEffect, useRef, type ReactNode, useCallback } from "react";
 import useDispatch from "../hooks/useDispatch";
 import useData from "../hooks/useData";
+import useReactive from "../hooks/useReactive";
 import PanZoom from "../helper/PanZoom";
-import { type Transform, type RootPropsType } from "../types";
+import { type Transform, type RootPropsType, type Viewport } from "../types";
 
 type ZoomPaneProps = {
   children: ReactNode;
   isControlledViewport: boolean;
+  viewport?: Viewport;
 } & Pick<RootPropsType, "onViewportChange">;
 
 /**
@@ -17,10 +19,11 @@ type ZoomPaneProps = {
  * - 将 `panZoom` 实例写入 store，供其他组件（如 MiniMap、Controls）使用
  */
 export default function ZoomPane(props: ZoomPaneProps) {
-  const { children, isControlledViewport, onViewportChange } = props;
+  const { children, isControlledViewport, onViewportChange, viewport } = props;
 
   const dispatch = useDispatch();
   const data = useData();
+  const reactive = useReactive();
 
   const rootRef = useRef<HTMLDivElement | null>(null);
 
@@ -35,19 +38,32 @@ export default function ZoomPane(props: ZoomPaneProps) {
     [onViewportChange, isControlledViewport],
   );
 
+  const onPanStateChange = useCallback(
+    (isPanning: boolean) => {
+      dispatch({ type: "setPanning", payload: isPanning });
+    },
+    [dispatch],
+  );
+
   const panZoom = useRef<PanZoom | null>(null);
   useEffect(() => {
     if (rootRef.current) {
+      const currentViewport = {
+        x: reactive.transform[0],
+        y: reactive.transform[1],
+        zoom: reactive.transform[2],
+      };
       panZoom.current = new PanZoom({
         el: rootRef.current,
         minZoom: data.minZoom,
         maxZoom: data.maxZoom,
-        viewport: data.defaultViewport,
+        viewport: currentViewport,
         zoomOnScroll: data.zoomOnScroll,
         zoomOnPinch: data.zoomOnPinch,
         zoomOnDoubleClick: data.zoomOnDoubleClick,
         panOnScroll: data.panOnScroll,
         onTransformChange,
+        onPanStateChange,
       });
       dispatch({ type: "setPanZoom", payload: panZoom.current });
       dispatch({
@@ -64,12 +80,30 @@ export default function ZoomPane(props: ZoomPaneProps) {
 
   useEffect(() => {
     panZoom.current?.setOptions({
+      minZoom: data.minZoom,
+      maxZoom: data.maxZoom,
       zoomOnScroll: data.zoomOnScroll,
       zoomOnPinch: data.zoomOnPinch,
       zoomOnDoubleClick: data.zoomOnDoubleClick,
       panOnScroll: data.panOnScroll,
+      onTransformChange,
+      onPanStateChange,
     });
-  }, [data.zoomOnScroll, data.zoomOnPinch, data.zoomOnDoubleClick, data.panOnScroll]);
+  }, [
+    data.minZoom,
+    data.maxZoom,
+    data.zoomOnScroll,
+    data.zoomOnPinch,
+    data.zoomOnDoubleClick,
+    data.panOnScroll,
+    onTransformChange,
+    onPanStateChange,
+  ]);
+
+  useEffect(() => {
+    if (!viewport) return;
+    panZoom.current?.syncViewport(viewport);
+  }, [viewport]);
 
   return (
     <div

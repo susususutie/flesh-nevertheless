@@ -13,7 +13,6 @@ type StoreUpdaterProps = { rfId: string } & Pick<
   | "onEdgesChange"
   | "nodeTypes"
   | "edgeTypes"
-  | "defaultViewport"
   | "viewport"
   | "zoomOnScroll"
   | "zoomOnPinch"
@@ -31,7 +30,7 @@ const fieldsToTrack = [
   "onEdgesChange",
   "nodeTypes",
   "edgeTypes",
-  "defaultViewport",
+  "viewport",
   "zoomOnScroll",
   "zoomOnPinch",
   "zoomOnDoubleClick",
@@ -47,7 +46,7 @@ const fieldsInitialValues = {
   onEdgesChange: initialState.onEdgesChange,
   nodeTypes: initialState.nodeTypes,
   edgeTypes: initialState.edgeTypes,
-  defaultViewport: initialState.defaultViewport,
+  viewport: undefined,
   zoomOnScroll: initialState.zoomOnScroll,
   zoomOnPinch: initialState.zoomOnPinch,
   zoomOnDoubleClick: initialState.zoomOnDoubleClick,
@@ -70,7 +69,38 @@ export default function StoreUpdater(props: StoreUpdaterProps) {
         const previousFieldValue = previousFields.current[fieldName];
 
         if (fieldValue === previousFieldValue) continue;
-        if (typeof fieldValue === "undefined") continue;
+        if (fieldName === "nodes") {
+          dispatch({
+            type: "setStore",
+            payload: { key: "nodesControlled", value: fieldValue !== undefined },
+          });
+        }
+        if (fieldName === "edges") {
+          dispatch({
+            type: "setStore",
+            payload: { key: "edgesControlled", value: fieldValue !== undefined },
+          });
+        }
+        if (fieldValue === undefined) continue;
+        if (fieldName === "minZoom") {
+          if (typeof fieldValue === "number") {
+            dispatch({ type: "setMinZoom", payload: fieldValue });
+          }
+          continue;
+        }
+        if (fieldName === "maxZoom") {
+          if (typeof fieldValue === "number") {
+            dispatch({ type: "setMaxZoom", payload: fieldValue });
+          }
+          continue;
+        }
+        if (fieldName === "viewport") {
+          dispatch({
+            type: "syncViewport",
+            payload: fieldValue as NonNullable<RootPropsType["viewport"]>,
+          });
+          continue;
+        }
         dispatch({
           type: "setStore",
           payload: { key: fieldName, value: fieldValue },
