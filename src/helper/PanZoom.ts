@@ -95,6 +95,7 @@ class PanZoom {
       if (this.destroyed) return;
       if (!this.isInteractive) return;
       if (!this.zoomOnDoubleClick) return;
+      if (!this.#shouldHandleDoubleClick(event)) return;
       event.preventDefault();
       this.zoomIn({ x: event.clientX, y: event.clientY });
     };
@@ -237,6 +238,12 @@ class PanZoom {
       x: clientX - rect.left,
       y: clientY - rect.top,
     };
+  }
+
+  #shouldHandleDoubleClick(event: MouseEvent) {
+    if (!(event.target instanceof Element)) return true;
+    if (!this.el?.contains(event.target)) return false;
+    return !event.target.closest("[data-flow-node], [data-flow-edge], [data-flow-no-canvas-zoom]");
   }
 
   #computeZoomAtClient(

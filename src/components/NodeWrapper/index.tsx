@@ -210,6 +210,7 @@ export default function NodeWrapper(props: NodeWrapperProps) {
   return (
     <div
       ref={nodeRef}
+      data-flow-node=""
       onPointerDown={onPointerDown}
       style={wrapperStyle}
       className={`react-flow__node react-flow__node-${nodeType}`}

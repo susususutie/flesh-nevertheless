@@ -80,6 +80,7 @@ export default function EdgeWrapper(props: EdgeWrapperProps) {
   return (
     <svg
       key={id}
+      data-flow-edge=""
       style={{
         position: "absolute",
         width: "100%",
