@@ -11,20 +11,8 @@ type CustomInputNode = Node<{ label?: string; count?: number }, "customInput">;
 function CustomInputNode(props: NodeProps<CustomInputNode>) {
   const [count, setCount] = useState(props.data?.count ?? 0);
   return (
-    <div
-      style={{
-        padding: "12px 16px",
-        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
-        color: "#fff",
-        borderRadius: 10,
-        minWidth: 100,
-        boxShadow: props.selected
-          ? "0 0 0 2px #2563eb, 0 4px 12px rgba(0,0,0,0.15)"
-          : "0 2px 6px rgba(0,0,0,0.1)",
-        fontSize: 13,
-      }}
-    >
-      <div style={{ opacity: 0.7, fontSize: 11, marginBottom: 4 }}>INPUT</div>
+    <>
+      <div style={{ opacity: 0.7, fontSize: 11, marginBottom: 4 }}>CustomInputNode</div>
       <div style={{ fontWeight: 600 }}>
         {typeof props.data?.label === "string" ? props.data.label : props.id}
         <button
@@ -38,7 +26,7 @@ function CustomInputNode(props: NodeProps<CustomInputNode>) {
         </button>
       </div>
       {props.dragging && <div style={{ fontSize: 11, opacity: 0.6 }}>dragging...</div>}
-    </div>
+    </>
   );
 }
 
