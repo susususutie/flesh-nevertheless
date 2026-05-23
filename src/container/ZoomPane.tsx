@@ -62,6 +62,7 @@ export default function ZoomPane(props: ZoomPaneProps) {
         zoomOnPinch: data.zoomOnPinch,
         zoomOnDoubleClick: data.zoomOnDoubleClick,
         panOnScroll: data.panOnScroll,
+        preventScrolling: data.preventScrolling,
         onTransformChange,
         onPanStateChange,
       });
@@ -86,6 +87,7 @@ export default function ZoomPane(props: ZoomPaneProps) {
       zoomOnPinch: data.zoomOnPinch,
       zoomOnDoubleClick: data.zoomOnDoubleClick,
       panOnScroll: data.panOnScroll,
+      preventScrolling: data.preventScrolling,
       onTransformChange,
       onPanStateChange,
     });
@@ -96,6 +98,7 @@ export default function ZoomPane(props: ZoomPaneProps) {
     data.zoomOnPinch,
     data.zoomOnDoubleClick,
     data.panOnScroll,
+    data.preventScrolling,
     onTransformChange,
     onPanStateChange,
   ]);
@@ -116,6 +119,7 @@ export default function ZoomPane(props: ZoomPaneProps) {
         top: 0,
         left: 0,
         touchAction: "none",
+        overscrollBehavior: "none",
       }}
     >
       {children}

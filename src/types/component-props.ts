@@ -99,4 +99,11 @@ export type RootPropsType<
    * 当同时开启 zoomOnScroll 时：滚轮默认平移，按住 Ctrl 键时滚轮缩放。
    */
   panOnScroll?: boolean;
+  /**
+   * 鼠标或触控板位于画布上方时是否阻止页面滚动。
+   * 默认值：true。
+   *
+   * 给节点内部滚动区域添加 `data-flow-no-wheel` 可跳过画布滚轮处理。
+   */
+  preventScrolling?: boolean;
 };

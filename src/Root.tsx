@@ -13,6 +13,7 @@ const wrapperStyle: CSSProperties = {
   width: "100%",
   height: "100%",
   overflow: "hidden",
+  overscrollBehavior: "none",
   position: "relative",
   zIndex: 0,
 };
@@ -42,6 +43,7 @@ function Root(props: RootPropsType) {
     zoomOnPinch,
     zoomOnDoubleClick,
     panOnScroll,
+    preventScrolling,
     ...rest
   } = props;
 
@@ -69,6 +71,7 @@ function Root(props: RootPropsType) {
         zoomOnPinch={zoomOnPinch}
         zoomOnDoubleClick={zoomOnDoubleClick}
         panOnScroll={panOnScroll}
+        preventScrolling={preventScrolling}
       >
         {/* 后续 props 变更，同步到全局状态 */}
         <StoreUpdater
@@ -86,6 +89,7 @@ function Root(props: RootPropsType) {
           zoomOnPinch={zoomOnPinch}
           zoomOnDoubleClick={zoomOnDoubleClick}
           panOnScroll={panOnScroll}
+          preventScrolling={preventScrolling}
         />
         <ZoomPane
           isControlledViewport={!!viewport}

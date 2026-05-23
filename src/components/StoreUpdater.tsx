@@ -18,6 +18,7 @@ type StoreUpdaterProps = { rfId: string } & Pick<
   | "zoomOnPinch"
   | "zoomOnDoubleClick"
   | "panOnScroll"
+  | "preventScrolling"
 >;
 
 const fieldsToTrack = [
@@ -35,6 +36,7 @@ const fieldsToTrack = [
   "zoomOnPinch",
   "zoomOnDoubleClick",
   "panOnScroll",
+  "preventScrolling",
 ] as const;
 const fieldsInitialValues = {
   rfId: initialState.rfId,
@@ -51,6 +53,7 @@ const fieldsInitialValues = {
   zoomOnPinch: initialState.zoomOnPinch,
   zoomOnDoubleClick: initialState.zoomOnDoubleClick,
   panOnScroll: initialState.panOnScroll,
+  preventScrolling: initialState.preventScrolling,
 };
 
 /**

@@ -44,6 +44,7 @@ export type StoreData<NodeType extends Node = Node, EdgeType extends Edge = Edge
   zoomOnPinch: boolean;
   zoomOnDoubleClick: boolean;
   panOnScroll: boolean;
+  preventScrolling: boolean;
 };
 
 // reactive 实时状态，高频变化（帧级）

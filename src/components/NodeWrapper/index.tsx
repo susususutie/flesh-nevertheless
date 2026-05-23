@@ -191,9 +191,11 @@ export default function NodeWrapper(props: NodeWrapperProps) {
     left: 0,
     transform: `translate(${node.position.x}px, ${node.position.y}px)`,
     zIndex: node.zIndex ?? 0,
-    border: node.selected ? "1px solid #2563eb" : "1px solid transparent",
+    border: node.selected ? "1px solid #2563eb" : "1px solid #dcdcde",
     borderRadius: 8,
     cursor: !isDraggable ? "default" : node.dragging ? "grabbing" : "grab",
+    padding: 4,
+    backgroundColor: "#fff",
   };
 
   useEffect(() => {

@@ -12,6 +12,7 @@ type Options = {
   zoomOnPinch?: boolean;
   zoomOnDoubleClick?: boolean;
   panOnScroll?: boolean;
+  preventScrolling?: boolean;
 };
 
 /** 参考 d3-zoom 实现一个 PanZoom 类 */
@@ -23,11 +24,13 @@ class PanZoom {
   private onTransformChange: (transform: Transform) => void;
   private onPanStateChange: ((isPanning: boolean) => void) | null;
   private destroyed: boolean;
+  private pointerInside: boolean;
   private isInteractive: boolean;
   private zoomOnScroll: boolean;
   private zoomOnPinch: boolean;
   private zoomOnDoubleClick: boolean;
   private panOnScroll: boolean;
+  private preventScrolling: boolean;
   private cleanupFns: Array<() => void>;
   private wheelRafId: number | null;
   private pendingWheelEvent: WheelEvent | null;
@@ -50,11 +53,13 @@ class PanZoom {
     this.onTransformChange = options.onTransformChange;
     this.onPanStateChange = options.onPanStateChange ?? null;
     this.destroyed = false;
+    this.pointerInside = false;
     this.isInteractive = options.isInteractive ?? true;
     this.zoomOnScroll = options.zoomOnScroll ?? true;
     this.zoomOnPinch = options.zoomOnPinch ?? true;
     this.zoomOnDoubleClick = options.zoomOnDoubleClick ?? true;
     this.panOnScroll = options.panOnScroll ?? false;
+    this.preventScrolling = options.preventScrolling ?? true;
     this.cleanupFns = [];
     this.wheelRafId = null;
     this.pendingWheelEvent = null;
@@ -76,8 +81,9 @@ class PanZoom {
     const onWheel = (event: WheelEvent) => {
       if (this.destroyed) return;
       if (!this.isInteractive) return;
+      if (!this.#shouldHandleWheel(event)) return;
+      if (this.preventScrolling) event.preventDefault();
       if (!this.zoomOnScroll && !this.panOnScroll) return;
-      event.preventDefault();
 
       this.pendingWheelEvent = event;
       if (this.wheelRafId != null) return;
@@ -89,6 +95,23 @@ class PanZoom {
         if (!latestEvent) return;
         this.#handleWheel(latestEvent);
       });
+    };
+    const captureWheelOptions = { capture: true, passive: false } as AddEventListenerOptions;
+    const onWindowWheel = (event: WheelEvent) => {
+      if (this.destroyed) return;
+      if (!this.isInteractive) return;
+      if (!this.preventScrolling) return;
+      if (!this.pointerInside) return;
+      if (this.#isNoWheelEvent(event)) return;
+      event.preventDefault();
+    };
+
+    const onPointerEnter = () => {
+      this.pointerInside = true;
+    };
+
+    const onPointerLeave = () => {
+      this.pointerInside = false;
     };
 
     const onDblClick = (event: MouseEvent) => {
@@ -179,6 +202,15 @@ class PanZoom {
 
     this.el.addEventListener("wheel", onWheel, { passive: false });
     this.cleanupFns.push(() => this.el?.removeEventListener("wheel", onWheel));
+    window.addEventListener("wheel", onWindowWheel, captureWheelOptions);
+    this.cleanupFns.push(() =>
+      window.removeEventListener("wheel", onWindowWheel, captureWheelOptions),
+    );
+
+    this.el.addEventListener("pointerenter", onPointerEnter);
+    this.el.addEventListener("pointerleave", onPointerLeave);
+    this.cleanupFns.push(() => this.el?.removeEventListener("pointerenter", onPointerEnter));
+    this.cleanupFns.push(() => this.el?.removeEventListener("pointerleave", onPointerLeave));
 
     this.el.addEventListener("dblclick", onDblClick);
     this.cleanupFns.push(() => this.el?.removeEventListener("dblclick", onDblClick));
@@ -244,6 +276,16 @@ class PanZoom {
     if (!(event.target instanceof Element)) return true;
     if (!this.el?.contains(event.target)) return false;
     return !event.target.closest("[data-flow-node], [data-flow-edge], [data-flow-no-canvas-zoom]");
+  }
+
+  #shouldHandleWheel(event: WheelEvent) {
+    if (!(event.target instanceof Element)) return true;
+    if (!this.el?.contains(event.target)) return false;
+    return !this.#isNoWheelEvent(event);
+  }
+
+  #isNoWheelEvent(event: WheelEvent) {
+    return event.target instanceof Element && !!event.target.closest("[data-flow-no-wheel]");
   }
 
   #computeZoomAtClient(
@@ -461,6 +503,7 @@ class PanZoom {
         | "zoomOnPinch"
         | "zoomOnDoubleClick"
         | "panOnScroll"
+        | "preventScrolling"
         | "onTransformChange"
         | "onPanStateChange"
       >
@@ -489,6 +532,7 @@ class PanZoom {
     if (options.zoomOnPinch !== undefined) this.zoomOnPinch = options.zoomOnPinch;
     if (options.zoomOnDoubleClick !== undefined) this.zoomOnDoubleClick = options.zoomOnDoubleClick;
     if (options.panOnScroll !== undefined) this.panOnScroll = options.panOnScroll;
+    if (options.preventScrolling !== undefined) this.preventScrolling = options.preventScrolling;
     if (options.onTransformChange !== undefined) this.onTransformChange = options.onTransformChange;
     if (options.onPanStateChange !== undefined) {
       this.onPanStateChange = options.onPanStateChange;

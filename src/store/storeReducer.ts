@@ -230,11 +230,6 @@ export default function storeReducer(state: StoreStateType, action: StoreAction)
         nodesDraggable: !isInteractive,
         nodesConnectable: !isInteractive,
       };
-    case "setPanning": {
-      if (typeof action.payload !== "boolean") return state;
-      if (action.payload === state.isPanning) return state;
-      return { ...state, isPanning: action.payload };
-    }
     case "setPanZoom": {
       if (action.payload === null) {
         if (state.panZoom === null) return state;

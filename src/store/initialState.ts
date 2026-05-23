@@ -24,6 +24,7 @@ const initialState: StoreStateType = {
   zoomOnPinch: true,
   zoomOnDoubleClick: true,
   panOnScroll: false,
+  preventScrolling: true,
   transform: [0, 0, 1],
   mousePosition: { x: 0, y: 0 },
   selectedPoint: null,

@@ -31,6 +31,7 @@ type StoreProviderProps = {
   | "zoomOnPinch"
   | "zoomOnDoubleClick"
   | "panOnScroll"
+  | "preventScrolling"
 >;
 
 function normalizeEdges(edges: StoreStateType["edges"]) {
@@ -53,6 +54,7 @@ function initState(props: StoreProviderProps): StoreStateType {
   const zoomOnPinch = props.zoomOnPinch ?? initialState.zoomOnPinch;
   const zoomOnDoubleClick = props.zoomOnDoubleClick ?? initialState.zoomOnDoubleClick;
   const panOnScroll = props.panOnScroll ?? initialState.panOnScroll;
+  const preventScrolling = props.preventScrolling ?? initialState.preventScrolling;
   const isControlled = props.viewport !== undefined;
   const resolvedInitialViewport = props.viewport ?? resolvedDefaultViewport;
   const initialZoom = isControlled
@@ -97,6 +99,7 @@ function initState(props: StoreProviderProps): StoreStateType {
     zoomOnPinch,
     zoomOnDoubleClick,
     panOnScroll,
+    preventScrolling,
     transform: [resolvedInitialViewport.x, resolvedInitialViewport.y, initialZoom] as [
       number,
       number,
@@ -142,6 +145,7 @@ export default function StoreProvider(props: StoreProviderProps) {
       zoomOnPinch: state.zoomOnPinch,
       zoomOnDoubleClick: state.zoomOnDoubleClick,
       panOnScroll: state.panOnScroll,
+      preventScrolling: state.preventScrolling,
     }),
     [
       state.minZoom,
@@ -167,6 +171,7 @@ export default function StoreProvider(props: StoreProviderProps) {
       state.zoomOnPinch,
       state.zoomOnDoubleClick,
       state.panOnScroll,
+      state.preventScrolling,
     ],
   );
   const reactiveValue = useMemo(
