@@ -38,13 +38,13 @@ export default function App() {
   const [count, setCount] = useState(80);
   return (
     <div style={{ display: "flex", flexWrap: "wrap", gap: 16 }}>
-      <div style={{ width: "100%", display: "flex", flexWrap: "wrap", gap: 16 }}>
+      <div style={{ width: "90%", display: "flex", flexWrap: "wrap", gap: 16 }}>
         <button onClick={() => setCount(Math.round(Math.random() * 100))}>
           changeCount {count}
         </button>
       </div>
 
-      <div style={{ width: "100%", height: 400, border: "1px solid" }}>
+      <div style={{ width: "90%", height: 400, border: "1px solid" }}>
         <Root
           nodeTypes={nodeTypes}
           defaultNodes={[
@@ -72,7 +72,7 @@ export default function App() {
         </Root>
       </div>
 
-      <div style={{ width: "100%", height: 400, border: "1px solid" }}>
+      <div style={{ width: "90%", height: 400, border: "1px solid" }}>
         <Root
           defaultNodes={[
             { id: "a", position: { x: 40, y: 40 }, data: { label: "bezier" } },
@@ -97,7 +97,7 @@ export default function App() {
         </Root>
       </div>
 
-      <div style={{ width: "100%", height: 400, border: "1px solid" }}>
+      <div style={{ width: "90%", height: 400, border: "1px solid" }}>
         <Root>
           <Toolbar>
             <DisplayZoom />
