@@ -4,6 +4,10 @@ export function getIsNodesInitialized<N extends Node>(
   nodes: N[],
   nodeLookup: NodeLookup<InternalNode<N>>,
 ): boolean {
+  if (nodeLookup.size === 0) {
+    return false;
+  }
+
   let nodesInitialized = nodes.length > 0;
 
   for (const userNode of nodes) {
