@@ -8,7 +8,7 @@ import ZoomPane from "./container/ZoomPane";
 import { type RootPropsType, type Viewport } from "./types";
 import { memo, useId, type CSSProperties } from "react";
 
-const initViewport: Viewport = { x: 0, y: 0, zoom: 10 };
+const initViewport: Viewport = { x: 0, y: 0, zoom: 1 };
 const wrapperStyle: CSSProperties = {
   width: "100%",
   height: "100%",

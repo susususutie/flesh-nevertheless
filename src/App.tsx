@@ -2,9 +2,11 @@ import { useState } from "react";
 import Basic from "./examples/Basic";
 import CustomNode from "./examples/CustomNode";
 import DefaultNodes from "./examples/DefaultNodes";
-import DefaultEdges from "./examples/DefaultEdges.tsx";
+import DefaultEdges from "./examples/DefaultEdges";
+import Edges from "./examples/Edges";
 
 const options = [
+  { value: "edges", label: "Edges", component: Edges },
   { value: "basic", label: "Basic", component: Basic },
   { value: "default-nodes", label: "Default Nodes", component: DefaultNodes },
   { value: "default-edges", label: "Default Edges", component: DefaultEdges },

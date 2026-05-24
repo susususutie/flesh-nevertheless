@@ -4,13 +4,17 @@ import { type EdgeProps } from "../../types";
 export default function SmoothStepEdge(props: EdgeProps) {
   const { sourceX, sourceY, targetX, targetY, selected, interactionWidth } = props;
   const midX = (sourceX + targetX) / 2;
-  const r = Math.min(Math.abs(targetY - sourceY) * 0.5, Math.abs(targetX - sourceX) * 0.25, 20);
+
+  const r = Math.min(Math.abs(targetY - sourceY) * 0.25, Math.abs(targetX - sourceX) * 0.25, 20);
+  const isSourceUp = sourceY < targetY;
+  const isSourceLeft = sourceX < targetX;
+
   const path = [
     `M ${sourceX} ${sourceY}`,
-    `L ${midX - r} ${sourceY}`,
-    `A ${r} ${r} 0 0 1 ${midX} ${sourceY + Math.sign(targetY - sourceY) * r}`,
+    `L ${isSourceLeft ? midX - r : midX + r} ${sourceY}`,
+    `A ${r} ${r} 0 0 ${(isSourceUp && isSourceLeft) || (!isSourceUp && !isSourceLeft) ? 1 : 0} ${midX} ${sourceY + Math.sign(targetY - sourceY) * r}`,
     `L ${midX} ${targetY - Math.sign(targetY - sourceY) * r}`,
-    `A ${r} ${r} 0 0 0 ${midX + r} ${targetY}`,
+    `A ${r} ${r} 0 0 ${(isSourceUp && isSourceLeft) || (!isSourceUp && !isSourceLeft) ? 0 : 1} ${isSourceLeft ? midX + r : midX - r} ${targetY}`,
     `L ${targetX} ${targetY}`,
   ].join(" ");
 
