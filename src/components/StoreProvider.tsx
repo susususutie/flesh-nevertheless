@@ -6,6 +6,7 @@ import ReactiveContext from "../contexts/ReactiveContext";
 import initialState from "../store/initialState";
 import storeReducer from "../store/storeReducer";
 import { type RootPropsType, type StoreAction, type StoreStateType } from "../types";
+import { adoptUserNodes } from "../helper";
 
 type StoreProviderProps = {
   rfId: string;
@@ -47,7 +48,7 @@ function normalizeEdges(edges: StoreStateType["edges"]) {
 function initState(props: StoreProviderProps): StoreStateType {
   const minZoom = props.minZoom ?? initialState.minZoom;
   const maxZoom = props.maxZoom ?? initialState.maxZoom;
-  const nodes = props.nodes ?? props.defaultNodes ?? initialState.nodes;
+
   const edges = normalizeEdges(props.edges ?? props.defaultEdges ?? initialState.edges);
   const resolvedDefaultViewport = props.defaultViewport ?? initialState.defaultViewport;
   const zoomOnScroll = props.zoomOnScroll ?? initialState.zoomOnScroll;
@@ -65,12 +66,16 @@ function initState(props: StoreProviderProps): StoreStateType {
   const nodesDraggable = props.nodesDraggable ?? initialState.nodesDraggable;
   const nodesSelectable = props.nodesSelectable ?? initialState.nodesSelectable;
 
+  const { nodesInitialized, nodes, nodeLookup } = adoptUserNodes(
+    props.nodes ?? props.defaultNodes ?? initialState.nodes,
+    initialState.nodeLookup,
+  );
+
   const state = {
     ...initialState,
     rfId: props.rfId,
     minZoom,
     maxZoom,
-    // 传入的原始数据，有很多空值
     nodes,
     edges,
     nodesControlled: props.nodes !== undefined,
@@ -78,13 +83,8 @@ function initState(props: StoreProviderProps): StoreStateType {
     nodesConnectable,
     nodesDraggable,
     nodesSelectable,
-    // 处理后的节点配置
-    nodeLookup: new Map(
-      nodes.map((node) => [
-        node.id,
-        { ...node, internals: { measured: {}, zIndex: node.zIndex ?? 0 } },
-      ]),
-    ),
+    nodesInitialized,
+    nodeLookup,
     edgeLookup: new Map(edges.map((edge) => [edge.id!, edge])),
     nodeTypes: (props.nodeTypes ?? initialState.nodeTypes) as StoreStateType["nodeTypes"],
     edgeTypes: (props.edgeTypes ?? initialState.edgeTypes) as StoreStateType["edgeTypes"],
@@ -133,6 +133,7 @@ export default function StoreProvider(props: StoreProviderProps) {
       nodesConnectable: state.nodesConnectable,
       nodesDraggable: state.nodesDraggable,
       nodesSelectable: state.nodesSelectable,
+      nodesInitialized: state.nodesInitialized,
       nodeLookup: state.nodeLookup,
       edgeLookup: state.edgeLookup,
       nodeTypes: state.nodeTypes,

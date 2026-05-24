@@ -14,8 +14,8 @@ import {
  * type MyNode = Node | CustomNode
  */
 export type RootPropsType<
-  NodeType extends Node = Node,
-  EdgeType extends Edge = Edge,
+  N extends Node = Node,
+  E extends Edge = Edge,
 > = HTMLAttributes<HTMLDivElement> & {
   minZoom?: number;
   maxZoom?: number;
@@ -23,11 +23,11 @@ export type RootPropsType<
   /**
    * 非受控模式，默认节点，不会自动更新
    */
-  defaultNodes?: NodeType[];
+  defaultNodes?: N[];
   /**
    * 手动传入 nodes 时，受控模式
    */
-  nodes?: NodeType[];
+  nodes?: N[];
   onNodesChange?: (changes: NodeChange[]) => void;
   /**
    * 是否允许节点连接。可被节点自身的 connectable 属性覆盖。
@@ -48,11 +48,11 @@ export type RootPropsType<
   /**
    * 非受控模式，默认边，不会自动更新
    */
-  defaultEdges?: EdgeType[];
+  defaultEdges?: E[];
   /**
    * 手动传入 edges 时，受控模式
    */
-  edges?: EdgeType[];
+  edges?: E[];
   onEdgesChange?: (changes: EdgeChange[]) => void;
 
   /**
@@ -60,13 +60,13 @@ export type RootPropsType<
    * key 对应 node.type，value 为用户自定义组件。
    * 必须用 useMemo 或在组件外定义，以避免每次渲染重建导致 bug。
    */
-  nodeTypes?: NodeTypes<NodeType>;
+  nodeTypes?: NodeTypes<N>;
   /**
    * 自定义边类型映射表。
    * key 对应 edge.type，value 为用户自定义组件。
    * 必须用 useMemo 或在组件外定义。
    */
-  edgeTypes?: EdgeTypes<EdgeType>;
+  edgeTypes?: EdgeTypes<E>;
 
   defaultViewport?: Viewport;
   /**

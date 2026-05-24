@@ -20,20 +20,21 @@ export type StoreConfig = {
 };
 
 // data 业务状态，中低频变化（秒级/分钟级）
-export type StoreData<NodeType extends Node = Node, EdgeType extends Edge = Edge> = {
+export type StoreData<N extends Node = Node, E extends Edge = Edge> = {
   minZoom: number;
   maxZoom: number;
 
-  nodes: NodeType[];
-  edges: EdgeType[];
+  nodes: N[];
+  edges: E[];
   nodesControlled: boolean;
   edgesControlled: boolean;
-  nodeLookup: NodeLookup<InternalNode<NodeType>>;
-  edgeLookup: EdgeLookup<EdgeType>;
-  nodeTypes: NodeTypes<NodeType>;
-  edgeTypes: EdgeTypes<EdgeType>;
-  onNodesChange: ((changes: NodeChange<NodeType>[]) => void) | null;
-  onEdgesChange: ((changes: EdgeChange<EdgeType>[]) => void) | null;
+  nodesInitialized: boolean;
+  nodeLookup: NodeLookup<InternalNode<N>>;
+  edgeLookup: EdgeLookup<E>;
+  nodeTypes: NodeTypes<N>;
+  edgeTypes: EdgeTypes<E>;
+  onNodesChange: ((changes: NodeChange<N>[]) => void) | null;
+  onEdgesChange: ((changes: EdgeChange<E>[]) => void) | null;
 
   defaultViewport: Viewport;
   panZoom: PanZoom | null;
@@ -56,10 +57,9 @@ export type StoreReactive = {
   isPanning: boolean;
 };
 
-export type StoreStateType<
-  NodeType extends Node = Node,
-  EdgeType extends Edge = Edge,
-> = StoreConfig & StoreData<NodeType, EdgeType> & StoreReactive;
+export type StoreStateType<N extends Node = Node, E extends Edge = Edge> = StoreConfig &
+  StoreData<N, E> &
+  StoreReactive;
 
 export type StoreAction =
   | { type: "transform"; payload: StoreReactive["transform"] }

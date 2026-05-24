@@ -1,5 +1,6 @@
 import { type EdgeChange, type NodeChange, type StoreAction, type StoreStateType } from "../types";
 import PanZoom from "../helper/PanZoom";
+import { adoptUserNodes } from "../helper";
 
 function isFiniteNumber(value: unknown): value is number {
   return typeof value === "number" && Number.isFinite(value);
@@ -167,22 +168,12 @@ export default function storeReducer(state: StoreStateType, action: StoreAction)
     case "applyNodeChanges": {
       const nextNodes = applyNodeChanges(state.nodes, action.payload);
       if (nextNodes === state.nodes) return state;
-      const nextNodeLookup = new Map(
-        nextNodes.map((node) => {
-          const prev = state.nodeLookup.get(node.id);
-          return [
-            node.id,
-            {
-              ...node,
-              internals: { measured: prev?.internals?.measured ?? {}, zIndex: node.zIndex ?? 0 },
-            },
-          ];
-        }),
-      );
+      const { nodesInitialized, nodes, nodeLookup } = adoptUserNodes(nextNodes, state.nodeLookup);
       return {
         ...state,
-        nodes: nextNodes,
-        nodeLookup: nextNodeLookup,
+        nodesInitialized,
+        nodes,
+        nodeLookup,
       };
     }
     case "applyEdgeChanges": {
@@ -243,23 +234,15 @@ export default function storeReducer(state: StoreStateType, action: StoreAction)
       const { key, value } = action.payload;
       if (state[key] === value) return state;
       if (key === "nodes" && Array.isArray(value)) {
-        const nextNodes = value as StoreStateType["nodes"];
-        const nextNodeLookup = new Map(
-          nextNodes.map((node) => {
-            const prev = state.nodeLookup.get(node.id);
-            return [
-              node.id,
-              {
-                ...node,
-                internals: { measured: prev?.internals?.measured ?? {}, zIndex: node.zIndex ?? 0 },
-              },
-            ];
-          }),
+        const { nodesInitialized, nodes, nodeLookup } = adoptUserNodes(
+          value as StoreStateType["nodes"],
+          state.nodeLookup,
         );
         return {
           ...state,
-          nodes: nextNodes,
-          nodeLookup: nextNodeLookup,
+          nodesInitialized,
+          nodes,
+          nodeLookup,
         };
       }
       if (key === "edges" && Array.isArray(value)) {

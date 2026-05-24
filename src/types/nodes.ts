@@ -11,10 +11,11 @@ export type NodeBase<
   type?: NodeType;
   // 暂时固定为 [0, 0] left-top
   // origin: NodeOrigin
+  // 节点相对于画布或父节点的坐标
   position: XYPosition;
   /** business data */
   data?: NodeData;
-
+  // 传入宽高，则按固定宽高渲染，否则尺寸不固定，渲染完成后再测量
   width?: number;
   height?: number;
   hidden?: boolean;
@@ -39,22 +40,21 @@ export type Node<
 };
 
 /** 内部存储的节点类型，包含测量信息和处理后的非空节点配置 */
-export type InternalNode<NodeType extends Node = Node> = NodeType & {
+export type InternalNode<N extends Node = Node> = N & {
   internals: {
-    // positionAbsolute: XYPosition;
+    // 实际测量尺寸
     measured: { width?: number; height?: number };
+    // 画布上的绝对坐标，根据父节点位置、节点自身 origin 和 extent 约束计算而来
+    positionAbsolute: XYPosition;
     zIndex: number;
     // bounds
   };
 };
 
 /** 节点类型映射表 */
-export type NodeTypes<NodeType extends Node = Node> = Record<
-  string,
-  ComponentType<NodeProps<NodeType>>
->;
+export type NodeTypes<N extends Node = Node> = Record<string, ComponentType<NodeProps<N>>>;
 
-export type NodeLookup<NodeType extends InternalNode = InternalNode> = Map<string, NodeType>;
+export type NodeLookup<N extends InternalNode = InternalNode> = Map<string, N>;
 
 /**
  * 注入给自定义节点的 props， 包含节点的基本信息和处理后的非空节点配置
@@ -77,13 +77,13 @@ export type NodeLookup<NodeType extends InternalNode = InternalNode> = Map<strin
  *}
  *```
  */
-export type NodeProps<NodeType extends Node = Node> = Pick<
-  NodeType,
+export type NodeProps<N extends Node = Node> = Pick<
+  N,
   "id" | "data" | "width" | "height" | "style" | "className"
 > &
   Required<
     Pick<
-      NodeType,
+      N,
       | "type"
       | "draggable"
       | "selectable"
