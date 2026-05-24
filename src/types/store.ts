@@ -28,7 +28,6 @@ export type StoreData<N extends Node = Node, E extends Edge = Edge> = {
   edges: E[];
   nodesControlled: boolean;
   edgesControlled: boolean;
-  nodesInitialized: boolean;
   nodeLookup: NodeLookup<InternalNode<N>>;
   edgeLookup: EdgeLookup<E>;
   nodeTypes: NodeTypes<N>;

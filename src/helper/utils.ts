@@ -1,11 +1,34 @@
 import { type Node, type NodeLookup, type InternalNode } from "../types";
 
+export function getIsNodesInitialized<N extends Node>(
+  nodes: N[],
+  nodeLookup: NodeLookup<InternalNode<N>>,
+): boolean {
+  let nodesInitialized = nodes.length > 0;
+
+  for (const userNode of nodes) {
+    let internalNode = nodeLookup.get(userNode.id);
+
+    // 尺寸还未测量出来，说明节点初始化未完成
+    if (
+      !internalNode ||
+      internalNode.internals.measured.width === undefined ||
+      internalNode.internals.measured.height === undefined
+    ) {
+      nodesInitialized = false;
+      break;
+    }
+  }
+
+  return nodesInitialized;
+}
+
 /**
  * 将用户提供的节点转换为内部节点
  * @param nodes 用户传入的nodes/defaultNodes数据
  * @param nodeLookup 处理过的内部节点数据
  */
-export default function adoptUserNodes<N extends Node>(
+export function adoptUserNodes<N extends Node>(
   nodes: N[],
   nodeLookup: NodeLookup<InternalNode<N>>,
 ): {

@@ -6,7 +6,7 @@ import ReactiveContext from "../contexts/ReactiveContext";
 import initialState from "../store/initialState";
 import storeReducer from "../store/storeReducer";
 import { type RootPropsType, type StoreAction, type StoreStateType } from "../types";
-import { adoptUserNodes } from "../helper";
+import { adoptUserNodes } from "../helper/utils";
 
 type StoreProviderProps = {
   rfId: string;
@@ -133,7 +133,6 @@ export default function StoreProvider(props: StoreProviderProps) {
       nodesConnectable: state.nodesConnectable,
       nodesDraggable: state.nodesDraggable,
       nodesSelectable: state.nodesSelectable,
-      nodesInitialized: state.nodesInitialized,
       nodeLookup: state.nodeLookup,
       edgeLookup: state.edgeLookup,
       nodeTypes: state.nodeTypes,

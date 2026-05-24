@@ -9,7 +9,6 @@ const initialState: StoreStateType = {
   edges: [],
   nodesControlled: false,
   edgesControlled: false,
-  nodesInitialized: false,
   nodeLookup: new Map(),
   edgeLookup: new Map(),
   nodeTypes: {} as StoreStateType["nodeTypes"],

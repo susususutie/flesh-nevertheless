@@ -1,6 +1,6 @@
 import { type EdgeChange, type NodeChange, type StoreAction, type StoreStateType } from "../types";
 import PanZoom from "../helper/PanZoom";
-import { adoptUserNodes } from "../helper";
+import { adoptUserNodes } from "../helper/utils";
 
 function isFiniteNumber(value: unknown): value is number {
   return typeof value === "number" && Number.isFinite(value);
@@ -145,6 +145,7 @@ export default function storeReducer(state: StoreStateType, action: StoreAction)
       }
       return { ...state, transform: [x, y, nextZoom] };
     }
+    /** 更新内部节点的测量尺寸，在渲染后调用 */
     case "updateInternalNodeMeasured": {
       const { id, width, height } = action.payload;
       if (typeof id !== "string" || id.length === 0) return state;
@@ -168,10 +169,9 @@ export default function storeReducer(state: StoreStateType, action: StoreAction)
     case "applyNodeChanges": {
       const nextNodes = applyNodeChanges(state.nodes, action.payload);
       if (nextNodes === state.nodes) return state;
-      const { nodesInitialized, nodes, nodeLookup } = adoptUserNodes(nextNodes, state.nodeLookup);
+      const { nodes, nodeLookup } = adoptUserNodes(nextNodes, state.nodeLookup);
       return {
         ...state,
-        nodesInitialized,
         nodes,
         nodeLookup,
       };
@@ -234,16 +234,11 @@ export default function storeReducer(state: StoreStateType, action: StoreAction)
       const { key, value } = action.payload;
       if (state[key] === value) return state;
       if (key === "nodes" && Array.isArray(value)) {
-        const { nodesInitialized, nodes, nodeLookup } = adoptUserNodes(
+        const { nodes, nodeLookup } = adoptUserNodes(
           value as StoreStateType["nodes"],
           state.nodeLookup,
         );
-        return {
-          ...state,
-          nodesInitialized,
-          nodes,
-          nodeLookup,
-        };
+        return { ...state, nodes, nodeLookup };
       }
       if (key === "edges" && Array.isArray(value)) {
         const nextEdges = normalizeEdges(value as StoreStateType["edges"]);
