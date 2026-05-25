@@ -1,4 +1,11 @@
-import { type Node, type NodeLookup, type InternalNode } from "../types";
+import {
+  type EdgePosition,
+  type Handle,
+  HandleTypeEnum,
+  type InternalNode,
+  type Node,
+  type NodeLookup,
+} from "../types";
 
 export function getIsNodesInitialized<N extends Node>(
   nodes: N[],
@@ -61,6 +68,7 @@ export function adoptUserNodes<N extends Node>(
           x: userNode.position?.x ?? internalNode?.internals?.positionAbsolute?.x ?? 0,
           y: userNode.position?.y ?? internalNode?.internals?.positionAbsolute?.y ?? 0,
         },
+        handles: parseHandles(userNode, internalNode?.internals?.handles || null),
         zIndex: userNode.zIndex ?? 0,
       },
     };
@@ -78,4 +86,53 @@ export function adoptUserNodes<N extends Node>(
   }
 
   return { nodesInitialized, nodes: newNodes, nodeLookup: newNodeLookup };
+}
+
+function parseHandles(userNode: Node, internalHandles: Handle[] | null) {
+  if (!userNode.handles) {
+    return internalHandles || [];
+  }
+  return userNode.handles
+    .map((h) => {
+      const internalHandle = internalHandles ? internalHandles.find((i) => i.id === h.id) : null;
+
+      return {
+        id: h.id,
+        type: h.type,
+        nodeId: userNode.id,
+        position: h.position,
+        x: h.x ?? internalHandle?.x,
+        y: h.y ?? internalHandle?.y,
+        width: h.width ?? internalHandle?.width,
+        height: h.height ?? internalHandle?.height,
+      };
+    })
+    .filter(
+      (h) =>
+        h.width !== undefined && h.height !== undefined && h.x !== undefined && h.y !== undefined,
+    ) as Handle[];
+}
+
+export function getEdgePosition(
+  sourceNode: InternalNode,
+  targetNode: InternalNode,
+  sourceHandle: string | null,
+  targetHandle: string | null,
+): EdgePosition | null {
+  const sHandles = sourceNode.internals.handles?.filter((h) => h.type === HandleTypeEnum.Source);
+  const tHandles = targetNode.internals.handles?.filter((h) => h.type === HandleTypeEnum.Target);
+  if (!sHandles || !tHandles) return null;
+
+  const sHandle = sourceHandle === null ? sHandles[0] : sHandles.find((h) => h.id === sourceHandle);
+  const tHandle = targetHandle === null ? tHandles[0] : tHandles.find((h) => h.id === targetHandle);
+  if (!sHandle || !tHandle) return null;
+
+  return {
+    sourceX: sourceNode.internals.positionAbsolute.x + sHandle.x,
+    sourceY: sourceNode.internals.positionAbsolute.y + sHandle.y,
+    targetX: targetNode.internals.positionAbsolute.x + tHandle.x,
+    targetY: targetNode.internals.positionAbsolute.y + tHandle.y,
+    sourcePosition: sHandle.position,
+    targetPosition: tHandle.position,
+  };
 }

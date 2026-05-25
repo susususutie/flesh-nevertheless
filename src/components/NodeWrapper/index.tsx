@@ -14,6 +14,7 @@ type NodeWrapperProps = {
   nodesConnectable: boolean;
   nodesDraggable: boolean;
   nodesSelectable: boolean;
+  resizeObserver: ResizeObserver | null;
 };
 
 export default function NodeWrapper(props: NodeWrapperProps) {
@@ -24,6 +25,7 @@ export default function NodeWrapper(props: NodeWrapperProps) {
     nodesConnectable,
     nodesDraggable,
     nodesSelectable,
+    resizeObserver,
   } = props;
   const data = useData();
   const dispatch = useDispatch();
@@ -47,18 +49,28 @@ export default function NodeWrapper(props: NodeWrapperProps) {
   // 监听节点大小变化，更新测量数据
   useEffect(() => {
     const el = nodeRef.current;
-    if (!el || node.hidden) return;
+    if (!el || node.hidden || !resizeObserver) return;
 
-    const update = () => {
-      const width = el.offsetWidth;
-      const height = el.offsetHeight;
-      dispatch({ type: "updateInternalNodeMeasured", payload: { id, width, height } });
+    // const update = () => {
+    //   const width = el.offsetWidth;
+    //   const height = el.offsetHeight;
+    //   dispatch({ type: "updateInternalNodeMeasured", payload: { id, width, height } });
+    // };
+    resizeObserver.observe(el);
+
+    return () => resizeObserver.unobserve(el);
+  }, [resizeObserver, id, node.hidden]);
+
+  useEffect(() => {
+    return () => {
+      if (cleanupDragRef.current) {
+        cleanupDragRef.current();
+        panZoomRef.current?.setOptions({ isInteractive: true });
+        cleanupDragRef.current = null;
+        dragRef.current = null;
+      }
     };
-    const ro = new ResizeObserver(update);
-    ro.observe(el);
-
-    return () => ro.disconnect();
-  }, [dispatch, id, node.hidden]);
+  }, []);
 
   if (node.hidden) return null;
 
@@ -198,19 +210,9 @@ export default function NodeWrapper(props: NodeWrapperProps) {
     backgroundColor: "#fff",
   };
 
-  useEffect(() => {
-    return () => {
-      if (cleanupDragRef.current) {
-        cleanupDragRef.current();
-        panZoomRef.current?.setOptions({ isInteractive: true });
-        cleanupDragRef.current = null;
-        dragRef.current = null;
-      }
-    };
-  }, []);
-
   return (
     <div
+      data-id={id}
       ref={nodeRef}
       data-flow-node=""
       onPointerDown={onPointerDown}

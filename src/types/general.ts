@@ -16,6 +16,28 @@ export type NodeDimensions = {
   height: number;
 };
 
+export const Position = {
+  Left: "left",
+  Right: "right",
+  Top: "top",
+  Bottom: "bottom",
+} as const;
+export type PositionType = (typeof Position)[keyof typeof Position];
+export const HandleTypeEnum = {
+  Source: "source",
+  Target: "target",
+} as const;
+export type HandleType = (typeof HandleTypeEnum)[keyof typeof HandleTypeEnum];
+export type Handle = {
+  id: string;
+  nodeId: string;
+  type: HandleType;
+  position: PositionType;
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+};
 export type StyleObject = Record<string, unknown>;
 
 export type NodeChange<NodeType extends Node = Node> =

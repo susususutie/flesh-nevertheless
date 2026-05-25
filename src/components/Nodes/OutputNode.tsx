@@ -1,4 +1,5 @@
-import { type NodeProps } from "../../types";
+import { type NodeProps, Position, HandleTypeEnum } from "../../types";
+import Handle from "../Handle";
 
 export default function OutputNode(props: NodeProps) {
   const data = props.data;
@@ -12,6 +13,12 @@ export default function OutputNode(props: NodeProps) {
     <>
       <div style={{ fontSize: 11, color: "#10b981", marginBottom: 2, fontWeight: 600 }}>OUTPUT</div>
       <div style={{ fontWeight: 600 }}>{label || props.id}</div>
+      <Handle
+        id="target"
+        nodeId={props.id}
+        type={HandleTypeEnum.Target}
+        position={Position.Right}
+      />
     </>
   );
 }

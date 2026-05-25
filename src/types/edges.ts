@@ -1,12 +1,13 @@
 import type { CSSProperties, ComponentType } from "react";
+import { type PositionType } from ".";
 
 export type EdgePosition = {
   sourceX: number;
   sourceY: number;
   targetX: number;
   targetY: number;
-  // sourcePosition: Position;
-  // targetPosition: Position;
+  sourcePosition: PositionType;
+  targetPosition: PositionType;
 };
 
 export type EdgeBase<
@@ -23,9 +24,9 @@ export type EdgeBase<
   source: string;
   /** target node id */
   target: string;
-  // 暂时不加 handle，后续再考虑
-  // sourceHandle?: string | null;
-  // targetHandle?: string | null;
+  // 对应节点的 Handle id
+  sourceHandle?: string | null;
+  targetHandle?: string | null;
 
   hidden?: boolean;
   animated?: boolean;
@@ -46,19 +47,16 @@ export type Edge<
 };
 
 /** 边类型映射表 */
-export type EdgeTypes<EdgeType extends Edge = Edge> = Record<
-  string,
-  ComponentType<EdgeProps<EdgeType>>
->;
+export type EdgeTypes<E extends Edge = Edge> = Record<string, ComponentType<EdgeProps<E>>>;
 
-export type EdgeLookup<EdgeType extends EdgeBase = EdgeBase> = Map<string, EdgeType>;
+export type EdgeLookup<E extends EdgeBase = EdgeBase> = Map<string, E>;
 
 /**
  * 注入给自定义边的 props
  * @public
  */
-export type EdgeProps<EdgeType extends Edge = Edge> = Pick<
-  EdgeType,
+export type EdgeProps<E extends Edge = Edge> = Pick<
+  E,
   | "id"
   | "type"
   | "animated"

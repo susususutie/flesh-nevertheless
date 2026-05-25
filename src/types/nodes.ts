@@ -1,5 +1,6 @@
-import type { XYPosition } from ".";
+import type { Handle, PositionType, XYPosition } from ".";
 import type { CSSProperties, ComponentType } from "react";
+import type { HandleType } from ".";
 
 export type NodeBase<
   NodeData extends Record<string, unknown> = Record<string, unknown>,
@@ -15,6 +16,16 @@ export type NodeBase<
   position: XYPosition;
   /** business data */
   data?: NodeData;
+  /** handles for node */
+  handles?: {
+    id: string;
+    type: HandleType;
+    position: PositionType;
+    x?: number;
+    y?: number;
+    width?: number;
+    height?: number;
+  }[];
   // 传入宽高，则按固定宽高渲染，否则尺寸不固定，渲染完成后再测量
   width?: number;
   height?: number;
@@ -47,7 +58,7 @@ export type InternalNode<N extends Node = Node> = N & {
     // 画布上的绝对坐标，根据父节点位置、节点自身 origin 和 extent 约束计算而来
     positionAbsolute: XYPosition;
     zIndex: number;
-    // bounds
+    handles: Handle[] | null;
   };
 };
 

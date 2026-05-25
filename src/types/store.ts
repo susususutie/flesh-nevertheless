@@ -76,4 +76,5 @@ export type StoreAction =
   | {
       type: "setStore";
       payload: { key: keyof StoreStateType; value: StoreStateType[keyof StoreStateType] };
-    };
+    }
+  | { type: "updateNodeInternals"; payload: Map<string, { nodeElement: HTMLDivElement }> };

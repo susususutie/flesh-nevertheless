@@ -1,7 +1,8 @@
+import { getEdgePosition } from "../../helper/utils";
 import useData from "../../hooks/useData";
 import useDispatch from "../../hooks/useDispatch";
-import { builtinEdgeTypes } from "./utils";
 import { type Edge, type EdgeChange, type InternalNode, type NodeChange } from "../../types";
+import { builtinEdgeTypes } from "./utils";
 
 type EdgeWrapperProps = {
   id: string;
@@ -20,17 +21,16 @@ export default function EdgeWrapper(props: EdgeWrapperProps) {
   const target = nodeLookup.get(edge.target) as InternalNode | undefined;
   if (!source || !target) return null;
 
-  const sourceInternals = source.internals;
-  const targetInternals = target.internals;
-  const sWidth = sourceInternals.measured?.width ?? 0;
-  const sHeight = sourceInternals.measured?.height ?? 0;
-  const tWidth = targetInternals.measured?.width ?? 0;
-  const tHeight = targetInternals.measured?.height ?? 0;
+  const edgePosition = getEdgePosition(
+    source,
+    target,
+    edge.sourceHandle || null,
+    edge.targetHandle || null,
+  );
 
-  const sourceX = source.position.x + sWidth / 2;
-  const sourceY = source.position.y + sHeight / 2;
-  const targetX = target.position.x + tWidth / 2;
-  const targetY = target.position.y + tHeight / 2;
+  if (!edgePosition) return null;
+
+  const { sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition } = edgePosition;
 
   const edgeType = edge.type || "default";
   const EdgeComponent =
@@ -104,6 +104,8 @@ export default function EdgeWrapper(props: EdgeWrapperProps) {
           sourceY={sourceY}
           targetX={targetX}
           targetY={targetY}
+          sourcePosition={sourcePosition}
+          targetPosition={targetPosition}
           interactionWidth={interactionWidth}
         />
       </g>

@@ -1,4 +1,14 @@
-import { type EdgeChange, type NodeChange, type StoreAction, type StoreStateType } from "../types";
+import {
+  type EdgeChange,
+  type Node,
+  type NodeChange,
+  type StoreAction,
+  type StoreStateType,
+  type InternalNode,
+  type Handle,
+  type PositionType,
+  type HandleType,
+} from "../types";
 import PanZoom from "../helper/PanZoom";
 import { adoptUserNodes } from "../helper/utils";
 
@@ -247,7 +257,100 @@ export default function storeReducer(state: StoreStateType, action: StoreAction)
       }
       return { ...state, [key]: value };
     }
+    case "updateNodeInternals": {
+      const updateNodes = action.payload;
+
+      if (updateNodes.size === 0) return state;
+
+      const nodeLookup = state.nodeLookup;
+      const newNodeLookup = new Map(nodeLookup);
+      const newNodes = [...state.nodes];
+
+      for (const [id, { nodeElement }] of updateNodes) {
+        const nodeIndex = newNodes.findIndex((node) => node.id === id);
+        const userNode = newNodes.find((node) => node.id === id);
+        if (nodeIndex === -1) continue;
+
+        const nodeInternals = nodeLookup.get(id);
+        if (!userNode || !nodeInternals) continue;
+
+        const width = nodeElement.offsetWidth;
+        const height = nodeElement.offsetHeight;
+        const sizeChanged =
+          nodeInternals.internals.measured.width !== width ||
+          nodeInternals.internals.measured.height !== height;
+
+        const doUpdate = !!(width && height && sizeChanged);
+        if (!doUpdate) continue;
+
+        const nodeRect = nodeElement.getBoundingClientRect();
+        const handles = getNodeHandles(nodeElement, nodeRect, id);
+        const newNode: Node = {
+          ...userNode,
+          width,
+          height,
+          handles: handles?.map((handle) => ({
+            id: handle.id,
+            type: handle.type,
+            position: handle.position,
+            x: handle.x,
+            y: handle.y,
+            width: handle.width,
+            height: handle.height,
+          })),
+        };
+        const newNodeInternals: InternalNode<Node> = {
+          ...newNode,
+          internals: {
+            ...nodeInternals.internals,
+            measured: { width, height },
+            positionAbsolute: {
+              x: newNode.position.x ?? nodeInternals.internals.positionAbsolute.x,
+              y: newNode.position.y ?? nodeInternals.internals.positionAbsolute.y,
+            },
+            handles,
+          },
+        };
+
+        newNodes[nodeIndex] = newNode;
+        newNodeLookup.set(id, newNodeInternals);
+      }
+
+      return {
+        ...state,
+        nodes: newNodes,
+        nodeLookup: newNodeLookup,
+      };
+    }
     default:
       return state;
   }
 }
+
+const getNodeHandles = (
+  nodeElement: HTMLDivElement,
+  nodeBounds: DOMRect,
+  nodeId: string,
+): Handle[] | null => {
+  const handles = nodeElement.querySelectorAll<HTMLDivElement>('[data-role="handle"]');
+
+  if (!handles || !handles.length) {
+    return null;
+  }
+
+  return Array.from(handles).map((handle): Handle => {
+    const handleRect = handle.getBoundingClientRect();
+
+    // console.log(handleRect.left, nodeBounds.left);
+    return {
+      nodeId,
+      id: handle.getAttribute("data-handle-id") as string,
+      type: handle.getAttribute("data-handle-type") as unknown as HandleType,
+      position: handle.getAttribute("data-handle-pos") as unknown as PositionType,
+      x: handleRect.left - nodeBounds.left,
+      y: handleRect.top - nodeBounds.top,
+      width: handle.offsetWidth,
+      height: handle.offsetHeight,
+    };
+  });
+};
