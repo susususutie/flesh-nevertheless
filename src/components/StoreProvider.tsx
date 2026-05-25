@@ -182,6 +182,7 @@ export default function StoreProvider(props: StoreProviderProps) {
         ? { x: state.selectedPoint.x, y: state.selectedPoint.y }
         : null,
       isPanning: state.isPanning,
+      connectionState: state.connectionState,
     }),
     [
       state.transform[0],
@@ -192,6 +193,7 @@ export default function StoreProvider(props: StoreProviderProps) {
       state.selectedPoint?.x,
       state.selectedPoint?.y,
       state.isPanning,
+      state.connectionState,
     ],
   );
 

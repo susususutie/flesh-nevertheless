@@ -1,5 +1,6 @@
 import StoreProvider from "./components/StoreProvider";
 import StoreUpdater from "./components/StoreUpdater";
+import ConnectionLineWrapper from "./container/ConnectionLineWrapper";
 import EdgeRenderer from "./container/EdgeRenderer";
 import NodeRenderer from "./container/NodeRenderer";
 import Pane from "./container/Pane";
@@ -103,6 +104,7 @@ function Root(props: RootPropsType) {
             </FlowViewport>
           </Pane>
         </ZoomPane>
+        <ConnectionLineWrapper />
         {children}
       </StoreProvider>
     </div>
