@@ -1,4 +1,5 @@
 import { type Edge, type Node } from ".";
+import type { ReactNode } from "react";
 
 export type Transform = [x: number, y: number, zoom: number];
 export type Viewport = {
@@ -50,3 +51,46 @@ export type EdgeChange<EdgeType extends Edge = Edge> =
   | { id: string; type: "select"; selected: boolean }
   | { id: string; type: "remove" }
   | { item: EdgeType; type: "add"; index?: number | undefined };
+
+export type BuiltinMarkerType = "arrowclosed" | "arrow" | "circle" | "diamond";
+
+export type Marker =
+  | {
+      type: BuiltinMarkerType;
+      color?: string;
+      width?: number;
+      height?: number;
+    }
+  | {
+      type: "custom";
+      render: (params: { color: string; width: number; height: number }) => ReactNode;
+      color?: string;
+      width?: number;
+      height?: number;
+    };
+
+export type Connection = {
+  source: string;
+  target: string;
+  sourceHandle?: string | null;
+  targetHandle?: string | null;
+};
+
+export type ConnectionState = {
+  isValid: boolean;
+  source: {
+    nodeId: string;
+    handleId: string;
+    type: HandleType;
+    position: PositionType;
+    x: number;
+    y: number;
+  };
+  target: {
+    nodeId: string;
+    handleId: string;
+    type: HandleType;
+    position: PositionType;
+  } | null;
+  mousePosition: { x: number; y: number } | null;
+} | null;

@@ -1,5 +1,5 @@
 import type { CSSProperties, ComponentType } from "react";
-import { type PositionType } from ".";
+import { type Marker, type PositionType } from ".";
 
 export type EdgePosition = {
   sourceX: number;
@@ -36,6 +36,8 @@ export type EdgeBase<
 
   selected?: boolean;
   interactionWidth?: number;
+  markerEnd?: Marker | string;
+  markerStart?: Marker | string;
 };
 
 export type Edge<
@@ -67,9 +69,13 @@ export type EdgeProps<E extends Edge = Edge> = Pick<
   | "target"
   | "selectable"
   | "deletable"
+  | "markerEnd"
+  | "markerStart"
 > &
   EdgePosition &
   // EdgeLabelOptions &
   {
     interactionWidth?: number;
+    markerEnd?: string;
+    markerStart?: string;
   };
