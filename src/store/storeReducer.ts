@@ -33,8 +33,9 @@ function normalizeEdges(edges: StoreStateType["edges"]) {
 function applyNodeChanges(
   nodes: StoreStateType["nodes"],
   changes: NodeChange[],
-): StoreStateType["nodes"] {
-  if (changes.length === 0) return nodes;
+  edges?: StoreStateType["edges"],
+): { nodes: StoreStateType["nodes"]; edgeChanges?: EdgeChange[] } {
+  if (changes.length === 0) return { nodes };
 
   const removeIds = new Set<string>();
   const selectMap = new Map<string, boolean>();
@@ -50,6 +51,16 @@ function applyNodeChanges(
       positionMap.set(change.id, change.position);
       if (typeof change.dragging === "boolean") {
         draggingMap.set(change.id, change.dragging);
+      }
+    }
+  }
+
+  let edgeChanges: EdgeChange[] | undefined;
+  if (edges && removeIds.size > 0) {
+    edgeChanges = [];
+    for (const edge of edges) {
+      if (edge.id && (removeIds.has(edge.source) || removeIds.has(edge.target))) {
+        edgeChanges.push({ id: edge.id, type: "remove" });
       }
     }
   }
@@ -80,7 +91,7 @@ function applyNodeChanges(
     });
   }
 
-  return changed ? nextNodes : nodes;
+  return { nodes: changed ? nextNodes : nodes, edgeChanges };
 }
 
 function applyEdgeChanges(
@@ -177,14 +188,20 @@ export default function storeReducer(state: StoreStateType, action: StoreAction)
       return { ...state, nodeLookup: nextNodeLookup };
     }
     case "applyNodeChanges": {
-      const nextNodes = applyNodeChanges(state.nodes, action.payload);
-      if (nextNodes === state.nodes) return state;
+      const { nodes: nextNodes, edgeChanges } = applyNodeChanges(
+        state.nodes,
+        action.payload,
+        state.edges,
+      );
+      if (nextNodes === state.nodes && !edgeChanges) return state;
       const { nodes, nodeLookup } = adoptUserNodes(nextNodes, state.nodeLookup);
-      return {
-        ...state,
-        nodes,
-        nodeLookup,
-      };
+      let nextEdges = state.edges;
+      if (edgeChanges && edgeChanges.length > 0) {
+        nextEdges = applyEdgeChanges(state.edges, edgeChanges);
+      }
+      const normalized = normalizeEdges(nextEdges);
+      const nextEdgeLookup = new Map(normalized.map((edge) => [edge.id!, edge]));
+      return { ...state, nodes, nodeLookup, edges: normalized, edgeLookup: nextEdgeLookup };
     }
     case "applyEdgeChanges": {
       const nextEdges = applyEdgeChanges(state.edges, action.payload);
