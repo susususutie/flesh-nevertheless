@@ -2,7 +2,8 @@ import BaseEdge from "./BaseEdge";
 import { type EdgeProps } from "../../types";
 
 export default function SimpleBezierEdge(props: EdgeProps) {
-  const { sourceX, sourceY, targetX, targetY, selected, interactionWidth } = props;
+  const { sourceX, sourceY, targetX, targetY, selected, interactionWidth, markerEnd, markerStart } =
+    props;
   const sourceControlX = sourceX;
   const sourceControlY = (sourceY + targetY) / 2;
   const targetControlX = targetX;
@@ -13,6 +14,8 @@ export default function SimpleBezierEdge(props: EdgeProps) {
     <BaseEdge
       path={path}
       interactionWidth={interactionWidth}
+      markerEnd={markerEnd}
+      markerStart={markerStart}
       style={{ stroke: selected ? "#2563eb" : "#9ca3af", strokeWidth: 2 }}
     />
   );

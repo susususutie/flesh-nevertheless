@@ -3,6 +3,8 @@ import useData from "../../hooks/useData";
 import useDispatch from "../../hooks/useDispatch";
 import { type Edge, type EdgeChange, type InternalNode, type NodeChange } from "../../types";
 import { builtinEdgeTypes } from "./utils";
+import { renderMarkerDef, resolveMarkerUrl, MARKER_DEFAULTS } from "../Edges/markers";
+import type { BuiltinMarkerType } from "../../types";
 
 type EdgeWrapperProps = {
   id: string;
@@ -38,6 +40,62 @@ export default function EdgeWrapper(props: EdgeWrapperProps) {
     builtinEdgeTypes[edgeType as keyof typeof builtinEdgeTypes] ||
     data.edgeTypes.default ||
     builtinEdgeTypes.default;
+
+  const markerDefs: React.ReactNode[] = [];
+  let resolvedMarkerEnd: string | undefined;
+  let resolvedMarkerStart: string | undefined;
+
+  function resolveEdgeMarker(
+    raw: unknown,
+    defType: BuiltinMarkerType,
+    set: (url: string | undefined) => void,
+  ): void {
+    if (!raw) {
+      const d = MARKER_DEFAULTS[defType];
+      markerDefs.push(renderMarkerDef(defType, d.color, d.width, d.height));
+      set(resolveMarkerUrl({ type: defType }));
+      return;
+    }
+    if (typeof raw === "string") {
+      set(raw);
+      return;
+    }
+    const m = raw as any;
+    if (m.type === "custom") {
+      const color = m.color ?? "#9ca3af";
+      const width = m.width ?? 20;
+      const height = m.height ?? 20;
+      const safeId = `marker-custom-${color}-${width}-${height}`.replace(/[^a-zA-Z0-9#-]/g, "_");
+      markerDefs.push(
+        <marker
+          id={safeId}
+          viewBox="0 0 10 10"
+          refX="10"
+          refY="5"
+          markerWidth={width}
+          markerHeight={height}
+          orient="auto-start-reverse"
+        >
+          {m.render({ color, width, height })}
+        </marker>,
+      );
+      set(`url(#${safeId})`);
+      return;
+    }
+    const d = MARKER_DEFAULTS[m.type as BuiltinMarkerType] ?? MARKER_DEFAULTS.arrowclosed;
+    const color = m.color ?? d.color;
+    const width = m.width ?? d.width;
+    const height = m.height ?? d.height;
+    markerDefs.push(renderMarkerDef(m.type as BuiltinMarkerType, color, width, height));
+    set(resolveMarkerUrl({ type: m.type as BuiltinMarkerType, color, width, height }));
+  }
+
+  resolveEdgeMarker(edge.markerEnd, "arrowclosed", (url) => {
+    resolvedMarkerEnd = url;
+  });
+  resolveEdgeMarker(edge.markerStart, "arrowclosed", (url) => {
+    resolvedMarkerStart = url;
+  });
 
   const handleSelect = (event: React.PointerEvent) => {
     if (!edge.id) return;
@@ -92,6 +150,7 @@ export default function EdgeWrapper(props: EdgeWrapperProps) {
       }}
       className={`react-flow__edge react-flow__edge-${edgeType}`}
     >
+      {markerDefs.length > 0 && <defs>{markerDefs}</defs>}
       <g onPointerDown={handleSelect} style={{ cursor: "pointer" }}>
         <EdgeComponent
           id={edge.id}
@@ -107,6 +166,8 @@ export default function EdgeWrapper(props: EdgeWrapperProps) {
           sourcePosition={sourcePosition}
           targetPosition={targetPosition}
           interactionWidth={interactionWidth}
+          markerEnd={resolvedMarkerEnd}
+          markerStart={resolvedMarkerStart}
         />
       </g>
     </svg>

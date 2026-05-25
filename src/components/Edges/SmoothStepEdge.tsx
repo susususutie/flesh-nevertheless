@@ -2,7 +2,8 @@ import BaseEdge from "./BaseEdge";
 import { type EdgeProps } from "../../types";
 
 export default function SmoothStepEdge(props: EdgeProps) {
-  const { sourceX, sourceY, targetX, targetY, selected, interactionWidth } = props;
+  const { sourceX, sourceY, targetX, targetY, selected, interactionWidth, markerEnd, markerStart } =
+    props;
   const midX = (sourceX + targetX) / 2;
 
   const r = Math.min(Math.abs(targetY - sourceY) * 0.25, Math.abs(targetX - sourceX) * 0.25, 20);
@@ -22,6 +23,8 @@ export default function SmoothStepEdge(props: EdgeProps) {
     <BaseEdge
       path={path}
       interactionWidth={interactionWidth}
+      markerEnd={markerEnd}
+      markerStart={markerStart}
       style={{ stroke: selected ? "#2563eb" : "#9ca3af", strokeWidth: 2 }}
     />
   );

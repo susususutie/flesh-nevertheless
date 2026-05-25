@@ -11,6 +11,8 @@ export default function BezierEdge(props: EdgeProps) {
     targetPosition,
     selected,
     interactionWidth,
+    markerEnd,
+    markerStart,
   } = props;
   const { path } = getBezierPath(
     sourceX,
@@ -25,6 +27,8 @@ export default function BezierEdge(props: EdgeProps) {
     <BaseEdge
       path={path}
       interactionWidth={interactionWidth}
+      markerEnd={markerEnd}
+      markerStart={markerStart}
       style={{ stroke: selected ? "#2563eb" : "#9ca3af", strokeWidth: 2 }}
     />
   );
