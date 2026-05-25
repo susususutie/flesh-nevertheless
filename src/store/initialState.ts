@@ -29,6 +29,7 @@ const initialState: StoreStateType = {
   mousePosition: { x: 0, y: 0 },
   selectedPoint: null,
   isPanning: false,
+  connectionState: null,
 };
 
 export default initialState;

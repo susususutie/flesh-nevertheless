@@ -339,6 +339,39 @@ export default function storeReducer(state: StoreStateType, action: StoreAction)
         nodeLookup: newNodeLookup,
       };
     }
+    case "setConnectionStart": {
+      return {
+        ...state,
+        connectionState: {
+          isValid: false,
+          source: action.payload,
+          target: null,
+          mousePosition: null,
+        },
+      };
+    }
+    case "setConnectionMove": {
+      if (!state.connectionState) return state;
+      return {
+        ...state,
+        connectionState: {
+          ...state.connectionState,
+          mousePosition: { x: action.payload.clientX, y: action.payload.clientY },
+        },
+      };
+    }
+    case "setConnectionTarget": {
+      if (!state.connectionState) return state;
+      const target = action.payload;
+      const isValid = target !== null && state.connectionState.source.nodeId !== target.nodeId;
+      return {
+        ...state,
+        connectionState: { ...state.connectionState, target, isValid },
+      };
+    }
+    case "setConnectionEnd": {
+      return { ...state, connectionState: null };
+    }
     default:
       return state;
   }

@@ -1,5 +1,6 @@
 import { type HTMLAttributes } from "react";
 import {
+  type Connection,
   type Edge,
   type EdgeChange,
   type EdgeTypes,
@@ -106,4 +107,6 @@ export type RootPropsType<
    * 给节点内部滚动区域添加 `data-flow-no-wheel` 可跳过画布滚轮处理。
    */
   preventScrolling?: boolean;
+
+  onConnect?: (connection: Connection) => void;
 };

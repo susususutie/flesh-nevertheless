@@ -11,6 +11,9 @@ import {
   type InternalNode,
   type NodeLookup,
   type EdgeLookup,
+  type ConnectionState,
+  type HandleType,
+  type PositionType,
 } from ".";
 
 // 静态配置, 来自 props，初始化后不变（从 props 中获取初始化后恒定不变 ）
@@ -54,6 +57,7 @@ export type StoreReactive = {
   mousePosition: { x: number; y: number };
   selectedPoint: { x: number; y: number } | null;
   isPanning: boolean;
+  connectionState: ConnectionState;
 };
 
 export type StoreStateType<N extends Node = Node, E extends Edge = Edge> = StoreConfig &
@@ -77,4 +81,26 @@ export type StoreAction =
       type: "setStore";
       payload: { key: keyof StoreStateType; value: StoreStateType[keyof StoreStateType] };
     }
-  | { type: "updateNodeInternals"; payload: Map<string, { nodeElement: HTMLDivElement }> };
+  | { type: "updateNodeInternals"; payload: Map<string, { nodeElement: HTMLDivElement }> }
+  | {
+      type: "setConnectionStart";
+      payload: {
+        nodeId: string;
+        handleId: string;
+        type: HandleType;
+        position: PositionType;
+        x: number;
+        y: number;
+      };
+    }
+  | { type: "setConnectionMove"; payload: { clientX: number; clientY: number } }
+  | {
+      type: "setConnectionTarget";
+      payload: {
+        nodeId: string;
+        handleId: string;
+        type: HandleType;
+        position: PositionType;
+      } | null;
+    }
+  | { type: "setConnectionEnd" };
