@@ -39,6 +39,17 @@ export default function Controls(props: ControlsProps) {
     }
   };
 
+  const handleFitView = () => {
+    if (!panZoom) return;
+    const nodes = Array.from(data.nodeLookup.values()).map((n) => ({
+      x: n.internals.positionAbsolute.x,
+      y: n.internals.positionAbsolute.y,
+      width: n.internals.measured.width ?? 100,
+      height: n.internals.measured.height ?? 50,
+    }));
+    panZoom.fitView(nodes);
+  };
+
   const isInteractive = data.nodesSelectable || data.nodesDraggable || data.nodesConnectable;
   const handleToggleInteractivity = () => {
     dispatch({ type: "toggleInteractivity" });
@@ -63,7 +74,7 @@ export default function Controls(props: ControlsProps) {
         </>
       ) : null}
       {showFitView ? (
-        <button className="control-button">
+        <button className="control-button" onClick={handleFitView}>
           <FitViewIcon />
         </button>
       ) : null}

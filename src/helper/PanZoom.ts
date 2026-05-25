@@ -608,6 +608,46 @@ class PanZoom {
     });
   }
 
+  fitView(
+    nodes: Array<{ x: number; y: number; width: number; height: number }>,
+    opts?: { padding?: number },
+  ): Viewport | null {
+    if (this.destroyed || nodes.length === 0) return null;
+
+    const padding = opts?.padding ?? 0.1;
+    const rect = this.el?.getBoundingClientRect();
+    if (!rect) return null;
+
+    let minX = Infinity,
+      minY = Infinity,
+      maxX = -Infinity,
+      maxY = -Infinity;
+    for (const n of nodes) {
+      if (n.x < minX) minX = n.x;
+      if (n.y < minY) minY = n.y;
+      if (n.x + n.width > maxX) maxX = n.x + n.width;
+      if (n.y + n.height > maxY) maxY = n.y + n.height;
+    }
+
+    const nw = maxX - minX;
+    const nh = maxY - minY;
+    if (nw <= 0 || nh <= 0) return null;
+
+    const availW = rect.width * (1 - padding * 2);
+    const availH = rect.height * (1 - padding * 2);
+
+    let zoom = Math.min(availW / nw, availH / nh);
+    zoom = Math.max(this.minZoom, Math.min(this.maxZoom, zoom));
+
+    const cx = (minX + maxX) / 2;
+    const cy = (minY + maxY) / 2;
+    const tx = rect.width / 2 - cx * zoom;
+    const ty = rect.height / 2 - cy * zoom;
+
+    this.#commitViewport({ x: tx, y: ty, zoom });
+    return { x: tx, y: ty, zoom };
+  }
+
   destroy() {
     for (const cleanupFn of this.cleanupFns) cleanupFn();
     this.cleanupFns = [];
