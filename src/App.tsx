@@ -4,6 +4,8 @@ import CustomNode from "./examples/CustomNode";
 import DefaultNodes from "./examples/DefaultNodes";
 import DefaultEdges from "./examples/DefaultEdges";
 import Edges from "./examples/Edges";
+import Connection from "./examples/Connection";
+import Markers from "./examples/Markers";
 
 const options = [
   { value: "edges", label: "Edges", component: Edges },
@@ -11,6 +13,8 @@ const options = [
   { value: "default-nodes", label: "Default Nodes", component: DefaultNodes },
   { value: "default-edges", label: "Default Edges", component: DefaultEdges },
   { value: "custom-node", label: "Custom Node", component: CustomNode },
+  { value: "connection", label: "Connection", component: Connection },
+  { value: "markers", label: "Markers", component: Markers },
 ];
 
 export default function App() {
