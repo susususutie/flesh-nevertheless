@@ -3,10 +3,11 @@ import type { HandleType, PositionType } from "../../types";
 import useDispatch from "../../hooks/useDispatch";
 
 const handleStyle: CSSProperties = {
-  width: 4,
-  height: 4,
+  width: 8,
+  height: 8,
   position: "absolute",
-  backgroundColor: "red",
+  // backgroundColor: "#bababa",
+  cursor: "crosshair",
 };
 
 type HandleProps = {
@@ -23,6 +24,7 @@ export default function Handle(props: HandleProps) {
   const onPointerDown = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (event.button !== 0) return;
     event.stopPropagation();
+    event.preventDefault();
 
     const handleRect = event.currentTarget.getBoundingClientRect();
     dispatch({

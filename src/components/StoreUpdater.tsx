@@ -11,6 +11,7 @@ type StoreUpdaterProps = { rfId: string } & Pick<
   | "onNodesChange"
   | "edges"
   | "onEdgesChange"
+  | "onConnect"
   | "nodeTypes"
   | "edgeTypes"
   | "viewport"
@@ -29,6 +30,7 @@ const fieldsToTrack = [
   "onNodesChange",
   "edges",
   "onEdgesChange",
+  "onConnect",
   "nodeTypes",
   "edgeTypes",
   "viewport",
@@ -46,6 +48,7 @@ const fieldsInitialValues = {
   onNodesChange: initialState.onNodesChange,
   edges: initialState.edges,
   onEdgesChange: initialState.onEdgesChange,
+  onConnect: initialState.onConnect,
   nodeTypes: initialState.nodeTypes,
   edgeTypes: initialState.edgeTypes,
   viewport: undefined,

@@ -68,6 +68,7 @@ export default function EdgeWrapper(props: EdgeWrapperProps) {
       const safeId = `marker-custom-${color}-${width}-${height}`.replace(/[^a-zA-Z0-9#-]/g, "_");
       markerDefs.push(
         <marker
+          key={safeId}
           id={safeId}
           viewBox="0 0 10 10"
           refX="10"
@@ -90,12 +91,16 @@ export default function EdgeWrapper(props: EdgeWrapperProps) {
     set(resolveMarkerUrl({ type: m.type as BuiltinMarkerType, color, width, height }));
   }
 
-  resolveEdgeMarker(edge.markerEnd, "arrowclosed", (url) => {
-    resolvedMarkerEnd = url;
-  });
-  resolveEdgeMarker(edge.markerStart, "arrowclosed", (url) => {
-    resolvedMarkerStart = url;
-  });
+  if (edge.markerEnd) {
+    resolveEdgeMarker(edge.markerEnd, "arrowclosed", (url) => {
+      resolvedMarkerEnd = url;
+    });
+  }
+  if (edge.markerStart) {
+    resolveEdgeMarker(edge.markerStart, "arrowclosed", (url) => {
+      resolvedMarkerStart = url;
+    });
+  }
 
   const handleSelect = (event: React.PointerEvent) => {
     if (!edge.id) return;

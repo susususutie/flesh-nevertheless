@@ -11,6 +11,7 @@ import {
   type InternalNode,
   type NodeLookup,
   type EdgeLookup,
+  type Connection,
   type ConnectionState,
   type HandleType,
   type PositionType,
@@ -37,6 +38,7 @@ export type StoreData<N extends Node = Node, E extends Edge = Edge> = {
   edgeTypes: EdgeTypes<E>;
   onNodesChange: ((changes: NodeChange<N>[]) => void) | null;
   onEdgesChange: ((changes: EdgeChange<E>[]) => void) | null;
+  onConnect: ((connection: Connection) => void) | null;
 
   defaultViewport: Viewport;
   panZoom: PanZoom | null;

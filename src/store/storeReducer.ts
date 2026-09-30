@@ -102,12 +102,15 @@ function applyEdgeChanges(
 
   const removeIds = new Set<string>();
   const selectMap = new Map<string, boolean>();
+  const addedEdges: StoreStateType["edges"] = [];
 
   for (const change of changes) {
     if (change.type === "remove") {
       removeIds.add(change.id);
     } else if (change.type === "select") {
       selectMap.set(change.id, change.selected);
+    } else if (change.type === "add") {
+      addedEdges.push(change.item as StoreStateType["edges"][number]);
     }
   }
 
@@ -132,6 +135,11 @@ function applyEdgeChanges(
 
     changed = true;
     nextEdges.push({ ...edge, selected: nextSelected });
+  }
+
+  if (addedEdges.length > 0) {
+    nextEdges.push(...addedEdges);
+    changed = true;
   }
 
   return changed ? nextEdges : edges;
@@ -293,15 +301,10 @@ export default function storeReducer(state: StoreStateType, action: StoreAction)
 
         const width = nodeElement.offsetWidth;
         const height = nodeElement.offsetHeight;
-        const sizeChanged =
-          nodeInternals.internals.measured.width !== width ||
-          nodeInternals.internals.measured.height !== height;
-
-        const doUpdate = !!(width && height && sizeChanged);
-        if (!doUpdate) continue;
+        if (!width || !height) continue;
 
         const nodeRect = nodeElement.getBoundingClientRect();
-        const handles = getNodeHandles(nodeElement, nodeRect, id);
+        const handles = getNodeHandles(nodeElement, nodeRect, state.transform[2]);
         const newNode: Node = {
           ...userNode,
           width,
@@ -380,7 +383,7 @@ export default function storeReducer(state: StoreStateType, action: StoreAction)
 const getNodeHandles = (
   nodeElement: HTMLDivElement,
   nodeBounds: DOMRect,
-  nodeId: string,
+  zoom: number,
 ): Handle[] | null => {
   const handles = nodeElement.querySelectorAll<HTMLDivElement>('[data-role="handle"]');
 
@@ -391,14 +394,13 @@ const getNodeHandles = (
   return Array.from(handles).map((handle): Handle => {
     const handleRect = handle.getBoundingClientRect();
 
-    // console.log(handleRect.left, nodeBounds.left);
     return {
-      nodeId,
+      nodeId: handle.getAttribute("data-nodeid") as string,
       id: handle.getAttribute("data-handle-id") as string,
       type: handle.getAttribute("data-handle-type") as unknown as HandleType,
       position: handle.getAttribute("data-handle-pos") as unknown as PositionType,
-      x: handleRect.left - nodeBounds.left,
-      y: handleRect.top - nodeBounds.top,
+      x: (handleRect.left - nodeBounds.left) / zoom,
+      y: (handleRect.top - nodeBounds.top) / zoom,
       width: handle.offsetWidth,
       height: handle.offsetHeight,
     };

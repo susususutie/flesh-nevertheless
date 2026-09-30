@@ -127,6 +127,7 @@ class PanZoom {
       if (this.destroyed) return;
       if (!this.isInteractive) return;
       if (event.button !== 0) return;
+      if ((event.target as HTMLElement).closest("[data-role='handle']")) return;
       this.mouseDown = true;
       this.panStartClient = { x: event.clientX, y: event.clientY };
       this.panStartViewport = { ...this.viewport };
@@ -158,6 +159,7 @@ class PanZoom {
     const onTouchStart = (event: TouchEvent) => {
       if (this.destroyed) return;
       if (!this.isInteractive) return;
+      if ((event.target as HTMLElement).closest("[data-role='handle']")) return;
       this.#handleTouchStart(event);
     };
 

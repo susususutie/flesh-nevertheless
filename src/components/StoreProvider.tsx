@@ -24,6 +24,7 @@ type StoreProviderProps = {
   | "defaultEdges"
   | "edges"
   | "onEdgesChange"
+  | "onConnect"
   | "defaultViewport"
   | "viewport"
   | "nodeTypes"
@@ -90,6 +91,7 @@ function initState(props: StoreProviderProps): StoreStateType {
     edgeTypes: (props.edgeTypes ?? initialState.edgeTypes) as StoreStateType["edgeTypes"],
     onNodesChange: props.onNodesChange ?? null,
     onEdgesChange: props.onEdgesChange ?? null,
+    onConnect: props.onConnect ?? null,
     defaultViewport: {
       x: resolvedDefaultViewport.x,
       y: resolvedDefaultViewport.y,
@@ -139,6 +141,7 @@ export default function StoreProvider(props: StoreProviderProps) {
       edgeTypes: state.edgeTypes,
       onNodesChange: state.onNodesChange,
       onEdgesChange: state.onEdgesChange,
+      onConnect: state.onConnect,
       defaultViewport: state.defaultViewport,
       panZoom: state.panZoom,
       zoomOnScroll: state.zoomOnScroll,
@@ -163,6 +166,7 @@ export default function StoreProvider(props: StoreProviderProps) {
       state.edgeTypes,
       state.onNodesChange,
       state.onEdgesChange,
+      state.onConnect,
       state.defaultViewport.x,
       state.defaultViewport.y,
       state.defaultViewport.zoom,

@@ -11,12 +11,12 @@ export default function DefaultNode(props: NodeProps) {
 
   return (
     <>
-      <Handle id="source" nodeId={props.id} type={HandleTypeEnum.Source} position={Position.Left} />
+      <Handle id="target" nodeId={props.id} type={HandleTypeEnum.Target} position={Position.Left} />
       {label || props.id}
       <Handle
-        id="target"
+        id="source"
         nodeId={props.id}
-        type={HandleTypeEnum.Target}
+        type={HandleTypeEnum.Source}
         position={Position.Right}
       />
     </>

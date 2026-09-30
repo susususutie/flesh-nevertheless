@@ -35,6 +35,7 @@ function Root(props: RootPropsType) {
     edges,
     defaultEdges,
     onEdgesChange,
+    onConnect,
     nodeTypes,
     edgeTypes,
     defaultViewport = initViewport,
@@ -59,11 +60,14 @@ function Root(props: RootPropsType) {
         maxZoom={maxZoom}
         nodes={nodes}
         defaultNodes={defaultNodes}
+        onNodesChange={onNodesChange}
         nodesConnectable={nodesConnectable}
         nodesDraggable={nodesDraggable}
         nodesSelectable={nodesSelectable}
         edges={edges}
         defaultEdges={defaultEdges}
+        onEdgesChange={onEdgesChange}
+        onConnect={onConnect}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         defaultViewport={defaultViewport}
@@ -83,6 +87,7 @@ function Root(props: RootPropsType) {
           onNodesChange={onNodesChange}
           edges={edges}
           onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
           nodeTypes={nodeTypes}
           edgeTypes={edgeTypes}
           viewport={viewport}

@@ -1,10 +1,10 @@
 import type { BuiltinMarkerType } from "../../types";
 
 export const MARKER_DEFAULTS = {
-  arrowclosed: { width: 20, height: 20, color: "#9ca3af" },
-  arrow: { width: 20, height: 20, color: "#9ca3af" },
-  circle: { width: 16, height: 16, color: "#9ca3af" },
-  diamond: { width: 20, height: 20, color: "#9ca3af" },
+  arrowclosed: { width: 12, height: 12, color: "#9ca3af" },
+  arrow: { width: 12, height: 12, color: "#9ca3af" },
+  circle: { width: 6, height: 6, color: "#9ca3af" },
+  diamond: { width: 12, height: 12, color: "#9ca3af" },
 } as const;
 
 export function toMarkerId(
@@ -27,6 +27,7 @@ export function renderMarkerDef(
     case "arrowclosed":
       return (
         <marker
+          key={id}
           id={id}
           viewBox="0 0 10 10"
           refX="10"
@@ -41,23 +42,25 @@ export function renderMarkerDef(
     case "arrow":
       return (
         <marker
+          key={id}
           id={id}
           viewBox="0 0 10 10"
-          refX="10"
+          refX="11"
           refY="5"
           markerWidth={width}
           markerHeight={height}
           orient="auto-start-reverse"
         >
-          <path d="M 0 0 L 10 5 L 0 10" fill="none" stroke={color} strokeWidth="1.5" />
+          <path d="M 0 0 L 10 5 L 0 10" fill="none" stroke={color} strokeWidth="1" />
         </marker>
       );
     case "circle":
       return (
         <marker
+          key={id}
           id={id}
           viewBox="0 0 10 10"
-          refX="5"
+          refX="10"
           refY="5"
           markerWidth={width}
           markerHeight={height}
@@ -69,9 +72,10 @@ export function renderMarkerDef(
     case "diamond":
       return (
         <marker
+          key={id}
           id={id}
           viewBox="0 0 10 10"
-          refX="5"
+          refX="10"
           refY="5"
           markerWidth={width}
           markerHeight={height}

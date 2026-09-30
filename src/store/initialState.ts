@@ -15,6 +15,7 @@ const initialState: StoreStateType = {
   edgeTypes: {} as StoreStateType["edgeTypes"],
   onNodesChange: null,
   onEdgesChange: null,
+  onConnect: null,
   defaultViewport: { x: 0, y: 0, zoom: 1 },
   panZoom: null,
   nodesConnectable: true,

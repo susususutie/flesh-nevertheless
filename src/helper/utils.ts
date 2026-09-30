@@ -128,10 +128,10 @@ export function getEdgePosition(
   if (!sHandle || !tHandle) return null;
 
   return {
-    sourceX: sourceNode.internals.positionAbsolute.x + sHandle.x,
-    sourceY: sourceNode.internals.positionAbsolute.y + sHandle.y,
-    targetX: targetNode.internals.positionAbsolute.x + tHandle.x,
-    targetY: targetNode.internals.positionAbsolute.y + tHandle.y,
+    sourceX: sourceNode.internals.positionAbsolute.x + sHandle.x + sHandle.width / 2,
+    sourceY: sourceNode.internals.positionAbsolute.y + sHandle.y + sHandle.height / 2,
+    targetX: targetNode.internals.positionAbsolute.x + tHandle.x + tHandle.width / 2,
+    targetY: targetNode.internals.positionAbsolute.y + tHandle.y + tHandle.height / 2,
     sourcePosition: sHandle.position,
     targetPosition: tHandle.position,
   };

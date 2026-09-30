@@ -148,7 +148,15 @@ export default function Pane({ children }: { children: ReactNode }) {
     <div
       ref={paneRef}
       className="react-flow__pane"
-      style={{ position: "absolute", width: "100%", height: "100%", top: 0, left: 0, cursor }}
+      style={{
+        position: "absolute",
+        width: "100%",
+        height: "100%",
+        top: 0,
+        left: 0,
+        cursor,
+        userSelect: "none",
+      }}
       onPointerDown={(event) => {
         if (event.button !== 0) return;
 
